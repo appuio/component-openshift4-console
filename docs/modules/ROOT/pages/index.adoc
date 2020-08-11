@@ -1,3 +1,6 @@
 = OpenShift4 Console: A Commodore component to manage the OpenShift4 Console
 
 {doctitle} is a Commodore component to manage the OpenShift4 Console.
+It creates a `consoles.operator.openshift.io` object named `cluster` in order to configure the console of the cluster.
+
+See the xref:references/parameters.adoc[parameters] reference for further details.

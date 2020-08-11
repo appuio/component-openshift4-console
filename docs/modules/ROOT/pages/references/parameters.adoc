@@ -1,0 +1,41 @@
+= Parameters
+
+The parent key for all of the following parameters is `openshift4_console`.
+
+
+== `config`
+
+[horizontal]
+type:: dictionary
+default:: CRD defaults.
+
+A dictionary holding the `.spec` for the console config.
+
+See the https://docs.openshift.com/container-platform/latest/web_console/customizing-the-web-console.html[OpenShift docs] for available parameters.
+
+=== `managementState`
+
+[horizontal]
+type:: enum `Managed`, `Unmanaged`, `Removed`
+default:: `Managed`
+
+Indicates whether and how the operator should manage the console.
+
+=== `route`
+
+[horizontal]
+type:: dictionary with `hostname` and `secret` keys
+default:: undefined
+
+Create a custom route to access the console.
+If the route is part of the default apps domain, no TLS cert needs to be specified since the default wildcard cert will be used.
+
+
+== Example
+
+[source,yaml]
+----
+config:
+  route:
+    hostname: console.apps.example.com
+----

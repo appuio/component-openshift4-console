@@ -1,3 +1,5 @@
 parameters:
   openshift4_console:
     namespace: openshift-console
+    config:
+      managementState: Managed

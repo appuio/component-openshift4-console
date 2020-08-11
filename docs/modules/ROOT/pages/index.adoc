@@ -1,0 +1,3 @@
+= OpenShift4 Console: A Commodore component to manage the OpenShift4 Console
+
+{doctitle} is a Commodore component to manage the OpenShift4 Console.

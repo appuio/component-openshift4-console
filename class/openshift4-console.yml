@@ -1,0 +1,11 @@
+parameters:
+  kapitan:
+    compile:
+      - input_paths:
+          - openshift4-console/component/app.jsonnet
+        input_type: jsonnet
+        output_path: apps/
+      - input_paths:
+          - openshift4-console/component/main.jsonnet
+        input_type: jsonnet
+        output_path: openshift4-console/

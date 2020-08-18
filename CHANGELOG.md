@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 
-- …
+- Initial implementation ([#1])
 
-[Unreleased]: https://github.com/appuio/component-openshift4-console/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/appuio/component-openshift4-console/compare/3f37209ff2a738b0faec93049c221e0ca0dbc034...HEAD
+
+[#1]: https://github.com/appuio/component-openshift4-console/pull/1

@@ -1,10 +1,21 @@
-// main template for openshift4-console
 local kap = import 'lib/kapitan.libjsonnet';
 local kube = import 'lib/kube.libjsonnet';
 local inv = kap.inventory();
-// The hiera parameters for the component
 local params = inv.parameters.openshift4_console;
 
-// Define outputs below
+local versionGroup = 'operator.openshift.io/v1';
+
 {
+  '00_namespace': kube.Namespace(params.namespace) {
+    metadata+: {
+      annotations:: {},
+      [if std.member(inv.classes, 'components.networkpolicy') then 'labels']+: {
+        [inv.parameters.networkpolicy.labels.noDefaults]: 'true',
+        [inv.parameters.networkpolicy.labels.purgeDefaults]: 'true',
+      },
+    },
+  },
+  '10_console': kube._Object(versionGroup, 'Console', 'cluster') {
+    spec+: params.config,
+  },
 }

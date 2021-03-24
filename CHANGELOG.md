@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation ([#1])
 
+## Fixed
+
+- Detection of component presence ([#4])
+
+
 [Unreleased]: https://github.com/appuio/component-openshift4-console/compare/3f37209ff2a738b0faec93049c221e0ca0dbc034...HEAD
 
 [#1]: https://github.com/appuio/component-openshift4-console/pull/1
+[#4]: https://github.com/appuio/component-openshift4-console/pull/4

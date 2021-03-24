@@ -9,7 +9,7 @@ local versionGroup = 'operator.openshift.io/v1';
   '00_namespace': kube.Namespace(params.namespace) {
     metadata+: {
       annotations:: {},
-      [if std.member(inv.classes, 'components.networkpolicy') then 'labels']+: {
+      [if std.member(inv.applications, 'networkpolicy') then 'labels']+: {
         [inv.parameters.networkpolicy.labels.noDefaults]: 'true',
         [inv.parameters.networkpolicy.labels.purgeDefaults]: 'true',
       },

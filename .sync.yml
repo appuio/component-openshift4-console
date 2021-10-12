@@ -1,0 +1,7 @@
+:global:
+  componentName: openshift4-console
+  feature_goldenTests: true
+
+docs/antora.yml:
+  name: openshift4-console
+  title: OpenShift4 Console

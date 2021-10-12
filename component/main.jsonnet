@@ -10,16 +10,18 @@ local clusterVersion =
     std.parseInt,
     std.split(params.openshift_version, '.')
   );
-  assert verparts[0] == 4 : 'This component only supports OCP4';
-  assert
-    std.length(verparts) > 1 :
-    'The parameter openshift_version must provide the OCP version as "<major>.<minor>"';
-  {
-    major: verparts[0],
-    minor: verparts[1],
-  };
+  if verparts[0] != 4 then
+    error 'This component only supports OCP4'
+  else
+    assert
+      std.length(verparts) > 1 :
+      'The parameter openshift_version must provide the OCP version as "<major>.<minor>"';
+    {
+      major: verparts[0],
+      minor: verparts[1],
+    };
 
-local newConfig = clusterVersion.minor >= 8;
+local oldConfig = clusterVersion.minor < 8;
 
 local versionGroup = 'operator.openshift.io/v1';
 
@@ -75,8 +77,8 @@ local consoleRoutePatch =
     },
   },
   '10_console': kube._Object(versionGroup, 'Console', 'cluster') {
-    spec+: if newConfig then consoleSpec else params.config,
+    spec+: if oldConfig then params.config else consoleSpec,
   },
-  [if newConfig && consoleRoutePatch != null then '20_ingress_config_patch']:
+  [if !oldConfig && consoleRoutePatch != null then '20_ingress_config_patch']:
     consoleRoutePatch,
 }

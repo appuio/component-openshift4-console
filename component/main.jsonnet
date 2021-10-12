@@ -101,9 +101,25 @@ local consoleRoutePatch =
         ),
       },
     };
-    rl.Patch(target, patch)
+    [
+      if obj.kind == 'ResourceLocker' then
+        obj {
+          metadata+: {
+            annotations+: {
+              // Ensure the patch is only applied after the certificate or secret
+              // exists.
+              'argocd.argoproj.io/sync-wave': '10',
+            },
+          },
+        }
+      else
+        obj
+      for obj in rl.Patch(target, patch)
+    ]
   else
     null;
+
+local tls = import 'tls.libsonnet';
 
 {
   '00_namespace': kube.Namespace(params.namespace) {
@@ -115,6 +131,8 @@ local consoleRoutePatch =
       },
     },
   },
+  [if std.length(tls.secrets) > 0 then '01_tls_secrets']: tls.secrets,
+  [if std.length(tls.certs) > 0 then '01_certs']: tls.certs,
   '10_console': kube._Object(versionGroup, 'Console', 'cluster') {
     spec+: consoleSpec,
   },

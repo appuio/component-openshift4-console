@@ -61,6 +61,36 @@ The component provides support to use the new recommended configuration via the 
 If both this parameter and parameter `route` are present, parameter `route` has precedence over this parameter.
 ====
 
+== `secrets`
+
+[horizontal]
+type:: dictionary
+default:: `{}`
+
+Each entry in parameter `secrets` is deployed onto the cluster as a Kubernetes Secret with `type=kubernetes.io/tls`.
+Entries with `null` values are skipped.
+This allows users to remove secrets which were configured higher up in the hierarchy.
+
+The component has basic validation to ensure the secret contents are a plausible Kubernetes TLS secret.
+
+The dictionary keys are used as `metadata.name` for the resulting `Secret` resources.
+The dictionary values are directly merged into a `Secret` resource which only has `type=kubernetes.io/tls` set.
+The secrets are created in the namespace indicated by parameter `namespace`.
+
+== `cert_manager_certs`
+
+[horizontal]
+type:: dictionary
+default:: `{}`
+
+Each entry in parameter `cert_manager_certs` is deployed onto the cluster as a cert-manager `Certificate` resource.
+Entries with `null` values are skipped.
+This allows users to remove certificates which were configured higher up in the hierarchy.
+
+The dictionary keys are used as `metadata.name` and `spec.secretName` for the resulting `Certificate` resources.
+The dictionary values are then directly directly merged into the mostly empty `Certificate` resources.
+
+
 == Example: Custom hostname in cluster's app domain
 
 [source,yaml]
@@ -83,5 +113,35 @@ openshift4_console:
       hostname: console.cluster.example.com
       servingCertKeyPairSecret:
         name: console-cluster-example-com-tls <1>
+  secrets:
+    console-cluster-example-com-tls:
+      stringData:
+        tls.crt: ?{vaultkv:${cluster:tenant}/${cluster:name}/openshift4-console/certificates/cert} <2>
+        tls.key: ?{vaultkv:${cluster:tenant}/${cluster:name}/openshift4-console/certificates/key} <3>
 ----
 <1> A secret with keys `tls.crt` and `tls.key` with this name must exist in namespace `openshift-config`.
+<2> Reference to the console hostname TLS certificate in Vault
+<3> Reference to the console hostname TLS private key in Vault
+
+=== Example: Custom hostname outside cluster's app domain with cert-manager certificate
+
+This configuration assumes that the DNS record for `console.cluster.example.com` points to the cluster's application LBs, ideally as a CNAME to the cluster's application domain.
+This is required so that cert-manager can request the Let's Encrypt certificate using a HTTP01 challenge.
+
+[source,yaml]
+----
+openshift4_console:
+  route:
+    console:
+      hostname: console.cluster.example.com
+      servingCertKeyPairSecret:
+        name: console-cluster-example-com-tls <1>
+  cert_manager_certs:
+    console-cluster-example-com-tls:
+      spec:
+        dnsNames:
+          - console.cluster.example.com
+        issuerRef:
+          name: letsencrypt-production
+          kind: ClusterIssuer
+----

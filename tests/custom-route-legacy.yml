@@ -9,13 +9,6 @@ parameters:
     namespace: syn-resource-locker
 
   openshift4_console:
-    route:
-      console:
-        hostname: console.cluster.example.org
-        servingCertKeyPairSecret:
-          name: console-cluster-example-org-tls
     config:
       route:
-        hostname: console.cluster.example.com
-        secret:
-          name: console-cluster-example-com-tls
+        hostname: console.cluster.example.org

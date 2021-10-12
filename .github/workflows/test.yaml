@@ -46,6 +46,8 @@ jobs:
           - defaults
           - custom-route
           - custom-route-4.7
+          - custom-route-legacy
+          - custom-route-legacy-4.7
     defaults:
       run:
         working-directory: ${{ env.COMPONENT_NAME }}

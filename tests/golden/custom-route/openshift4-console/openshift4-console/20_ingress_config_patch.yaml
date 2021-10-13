@@ -16,7 +16,7 @@ rules:
   - apiGroups:
       - config.openshift.io
     resources:
-      - ingresss
+      - ingresses
     verbs:
       - get
       - list

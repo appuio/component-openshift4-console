@@ -2,6 +2,28 @@
 
 The parent key for all of the following parameters is `openshift4_console`.
 
+== `openshift_version`
+
+[horizontal]
+type:: string
+default:: `4.8`
+
+The component uses this parameter to select the appropriate recommended way to configure a custom console hostname.
+
+On OpenShift 4.7 and older, the values provided for parameters `config.route` or `route` are inserted into the `console.operator.openshift.io/cluster` custom resource.
+
+On OpenShift 4.8 and newer, the values provided for the parameters are configured in `spec.componentRoutes` of the `ingress.config.openshift.io/cluster` custom resource.
+
+== `route`
+
+[horizontal]
+type:: dictionary
+default:: `{"console": {}, "downloads": {}}`
+
+A dictionary holding the configuration for the console and download routes.
+
+The component will look for keys `hostname` and `servingCertKeyPairSecret` in the values of keys `console` and `downloads`.
+The component expects that the value of `servingCertKeyPairSecret` is of the form `{"name": "<secret_name>"}` and refers to a secret in namespace `openshift-config`.
 
 == `config`
 
@@ -13,7 +35,7 @@ A dictionary holding the `.spec` for the console config.
 
 See the https://docs.openshift.com/container-platform/latest/web_console/customizing-the-web-console.html[OpenShift docs] for available parameters.
 
-=== `managementState`
+=== `config.managementState`
 
 [horizontal]
 type:: enum `Managed`, `Unmanaged`, `Removed`
@@ -21,7 +43,7 @@ default:: `Managed`
 
 Indicates whether and how the operator should manage the console.
 
-=== `route`
+=== `config.route`
 
 [horizontal]
 type:: dictionary with `hostname` and `secret` keys
@@ -30,12 +52,36 @@ default:: undefined
 Create a custom route to access the console.
 If the route is part of the default apps domain, no TLS cert needs to be specified since the default wildcard cert will be used.
 
+[IMPORTANT]
+====
+This configuration parameter is deprecated starting with OpenShift 4.8, see the https://docs.openshift.com/container-platform/4.8/web_console/customizing-the-web-console.html#customizing-the-console-route_customizing-web-console[upstream documentation].
 
-== Example
+The component provides support to use the new recommended configuration via the `ingress.config.openshift.io/cluster` object, see the documentation for parameters <<_openshift_version,`openshift_version`>> and <<_route,`route`>>.
+
+If both this parameter and parameter `route` are present, parameter `route` has precedence over this parameter.
+====
+
+== Example: Custom hostname in cluster's app domain
 
 [source,yaml]
 ----
-config:
+openshift4_console:
   route:
-    hostname: console.apps.example.com
+    console:
+      hostname: console.apps.example.com
 ----
+
+=== Example: Custom hostname outside cluster's app domain
+
+In this case we need to specify a custom certificate:
+
+[source,yaml]
+----
+openshift4_console:
+  route:
+    console:
+      hostname: console.cluster.example.com
+      servingCertKeyPairSecret:
+        name: console-cluster-example-com-tls <1>
+----
+<1> A secret with keys `tls.crt` and `tls.key` with this name must exist in namespace `openshift-config`.

@@ -5,3 +5,14 @@
 docs/antora.yml:
   name: openshift4-console
   title: OpenShift4 Console
+
+.github/workflows/test.yaml:
+  goldenTest_makeTarget: golden-diff -e instance=${{ matrix.instance }}
+  matrix:
+    key: instance
+    entries:
+      - defaults
+      - custom-route
+      - custom-route-4.7
+      - custom-route-legacy
+      - custom-route-legacy-4.7

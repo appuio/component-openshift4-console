@@ -1,0 +1,41 @@
+parameters:
+  kapitan:
+    dependencies:
+      - type: https
+        source: https://raw.githubusercontent.com/projectsyn/component-cert-manager/v2.2.0/lib/cert-manager.libsonnet
+        output_path: vendor/lib/cert-manager.libsonnet
+      - type: https
+        source: https://raw.githubusercontent.com/projectsyn/component-resource-locker/v2.1.0/lib/resource-locker.libjsonnet
+        output_path: vendor/lib/resource-locker.libjsonnet
+
+  resource_locker:
+    namespace: syn-resource-locker
+
+  openshift4_console:
+    route:
+      console:
+        hostname: console.cluster.example.org
+        servingCertKeyPairSecret:
+          name: console-cluster-example-org-tls
+    config:
+      route:
+        hostname: console.cluster.example.com
+        secret:
+          name: console-cluster-example-com-tls
+
+    secrets:
+      unused: null
+      console-cluster-example-com-tls:
+        stringData:
+          tls.crt: ?{vaultkv:${cluster:tenant}/${cluster:name}/openshift4-console/tls/cert}
+          tls.key: ?{vaultkv:${cluster:tenant}/${cluster:name}/openshift4-console/tls/key}
+
+    cert_manager_certs:
+      unused: null
+      console-cluster-example-org-tls:
+        spec:
+          dnsNames:
+            - console.cluster.example.org
+          issuerRef:
+            name: letsencrypt-staging
+            kind: ClusterIssuer

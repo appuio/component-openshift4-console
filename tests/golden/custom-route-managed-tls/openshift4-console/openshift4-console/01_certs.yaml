@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  annotations: {}
+  labels:
+    name: console-cluster-example-org-tls
+  name: console-cluster-example-org-tls
+  namespace: openshift-config
+spec:
+  dnsNames:
+    - console.cluster.example.org
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-staging
+  secretName: console-cluster-example-org-tls

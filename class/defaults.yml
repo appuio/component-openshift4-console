@@ -7,3 +7,6 @@ parameters:
       downloads: {}
     config:
       managementState: Managed
+
+    secrets: {}
+    cert_manager_certs: {}

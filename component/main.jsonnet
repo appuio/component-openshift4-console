@@ -75,7 +75,7 @@ local consoleSpec =
 // Create ResourceLocker patch to configure console route in
 // ingress.config.openshift.io/cluster object
 local consoleRoutePatch =
-  local target = kube._Object('config.openshift.io/v1', 'ingress', 'cluster');
+  local target = kube._Object('config.openshift.io/v1', 'Ingress', 'cluster');
   local needsPatch =
     hostname != null || std.objectHas(params.route.downloads, 'hostname');
   if needsPatch then

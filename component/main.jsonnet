@@ -114,7 +114,11 @@ local consoleRoutePatch =
         }
       else
         obj
-      for obj in rl.Patch(target, patch)
+      for obj in rl.Patch(
+        target,
+        patch,
+        patchstrategy='application/merge-patch+json'
+      )
     ]
   else
     null;

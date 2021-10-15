@@ -53,7 +53,7 @@ spec:
     - id: patch1
       patchTemplate: "\"spec\":\n  \"componentRoutes\":\n  - \"hostname\": \"console.cluster.example.org\"\
         \n    \"name\": \"console\"\n    \"namespace\": \"openshift-console\""
-      patchType: application/strategic-merge-patch+json
+      patchType: application/merge-patch+json
       targetObjectRef:
         apiVersion: config.openshift.io/v1
         kind: Ingress

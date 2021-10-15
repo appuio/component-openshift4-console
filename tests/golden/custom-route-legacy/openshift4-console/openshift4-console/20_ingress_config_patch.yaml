@@ -56,7 +56,7 @@ spec:
       patchType: application/strategic-merge-patch+json
       targetObjectRef:
         apiVersion: config.openshift.io/v1
-        kind: ingress
+        kind: Ingress
         name: cluster
   serviceAccountRef:
     name: cluster-manager

@@ -1,8 +1,6 @@
 ;
 ; File managed by ModuleSync - Do Not Edit
 ;
-; Additional Makefiles can be added to `.sync.yml` in 'Makefile.includes'
-;
 ; This file is for unifying the coding style for different editors and IDEs.
 ; More information at https://editorconfig.org
 

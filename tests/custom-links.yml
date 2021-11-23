@@ -1,0 +1,16 @@
+parameters:
+  openshift4_console:
+    console_links:
+      homepage:
+        href: 'https://www.example.com/'
+        location: ApplicationMenu
+        text: Home
+        applicationMenu:
+          section: Company
+          # image that is 24x24 in size
+          imageURL: https://via.placeholder.com/24
+      user-docs:
+        href: 'https://docs.example.com/'
+        location: HelpMenu
+        text: User Documentation
+      unused: null

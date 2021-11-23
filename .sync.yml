@@ -17,6 +17,7 @@ docs/antora.yml:
       - custom-route-legacy
       - custom-route-legacy-4.7
       - custom-route-managed-tls
+      - custom-links
 
 Makefile:
   includes:

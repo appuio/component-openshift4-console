@@ -61,6 +61,17 @@ The component provides support to use the new recommended configuration via the 
 If both this parameter and parameter `route` are present, parameter `route` has precedence over this parameter.
 ====
 
+== `console_links`
+
+[horizontal]
+type:: dictionary
+default:: `{}`
+
+Each entry in parameter `console_links` is deployed onto the cluster as an https://docs.openshift.com/container-platform/4.9/web_console/customizing-the-web-console.html#creating-custom-links_customizing-web-console[OpenShift `ConsoleLink`].
+The value of the entry will be used as the `ConsoleLink` specification.
+Entries with `null` values are skipped.
+This allows users to remove links which were configured higher up in the hierarchy.
+
 == `secrets`
 
 [horizontal]
@@ -145,3 +156,35 @@ openshift4_console:
           name: letsencrypt-production
           kind: ClusterIssuer
 ----
+
+
+=== Example: Custom links in the web console
+
+[source,yaml]
+----
+openshift4_console:
+  console_links:
+    homepage: <1>
+      href: 'https://www.example.com/'
+      location: ApplicationMenu
+      text: Home
+      applicationMenu:
+        section: Company
+        # image that is 24x24 in size
+        imageURL: https://via.placeholder.com/24
+    user-docs: <2>
+      href: 'https://docs.example.com/'
+      location: HelpMenu
+      text: User Documentation
+    project-link: <3>
+      href: 'https://docs.example.com/organization/'
+      location: HelpMenu
+      text: User Documentation
+      namespaceDashboard:
+        matchExpressions:
+         - key: organization
+           operation: Exists
+----
+<1> Adds a link to an overflow menu at the top of every page
+<2> Adds a link to the help menu at the top of every page
+<3> Adds a link to the the dashboard of every namespace with a label `organization`

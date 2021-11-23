@@ -10,3 +10,5 @@ parameters:
 
     secrets: {}
     cert_manager_certs: {}
+
+    console_links: {}

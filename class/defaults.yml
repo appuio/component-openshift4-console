@@ -12,3 +12,4 @@ parameters:
     cert_manager_certs: {}
 
     console_links: {}
+    custom_logo: {}

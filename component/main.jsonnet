@@ -65,12 +65,27 @@ local consoleSpec =
     for k in std.objectFields(params.config)
     if k != 'route'
   } +
-  // Inject route config using both parameters in consoleSpec on OCP4.7 and
-  // older.
-  if oldConfig then
-    { route: oldRouteCfg }
-  else
-    {};
+  (
+    // Inject route config using both parameters in consoleSpec on OCP4.7 and
+    // older.
+    if oldConfig then
+      { route: oldRouteCfg }
+    else
+      {}
+  ) +
+  (
+    if std.length(std.objectFields(params.custom_logo)) > 0 then
+      {
+        customization+: {
+          customLogoFile: {
+            key: std.objectFields(params.custom_logo)[0],
+            name: 'console-logo',
+          },
+        },
+      }
+    else
+      {}
+  );
 
 // Create ResourceLocker patch to configure console route in
 // ingress.config.openshift.io/cluster object
@@ -137,6 +152,20 @@ local tls = import 'tls.libsonnet';
   },
   [if std.length(tls.secrets) > 0 then '01_tls_secrets']: tls.secrets,
   [if std.length(tls.certs) > 0 then '01_certs']: tls.certs,
+  [if std.length(std.objectFields(params.custom_logo)) > 0 then '01_logo']:
+    kube.ConfigMap('console-logo') {
+      metadata+: {
+        // ConfigMap must be deployed in namespace openshift-config
+        namespace: 'openshift-config',
+        // ConfigMap will be copied to namespace openshift-console
+        // To prevent ArgoCD from removing or complaining about the copy we add these annotations
+        annotations+: {
+          'argocd.argoproj.io/sync-options': 'Prune=false',
+          'argocd.argoproj.io/compare-options': 'IgnoreExtraneous',
+        },
+      },
+      data: params.custom_logo,
+    },
   '10_console': kube._Object(versionGroup, 'Console', 'cluster') {
     spec+: consoleSpec,
   },

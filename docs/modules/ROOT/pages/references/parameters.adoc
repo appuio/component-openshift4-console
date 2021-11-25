@@ -81,7 +81,7 @@ default:: `{}`
 Add a custom logo to the console.
 Takes a single key with the filename and the value is the base64 encoded logo.
 The logo can be a file in any common image format, including GIF, JPG, PNG, or SVG, and is constrained to a max-height of 60px
-The filename needs to have a valid filename extension.
+The filename needs to have a filename extension which matches the image format.
 
 [NOTE]
 ====

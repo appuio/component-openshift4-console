@@ -25,6 +25,19 @@ local oldConfig = clusterVersion.minor < 8;
 
 local versionGroup = 'operator.openshift.io/v1';
 
+local logoFileName =
+  if std.length(std.objectFields(params.custom_logo)) > 0 then
+    assert std.length(std.objectFields(params.custom_logo)) == 1 :
+           'The parameter custom_logo can only contain a single logo';
+    local name = std.objectFields(params.custom_logo)[0];
+    local nameParts = std.split(name, '.');
+    assert std.length(nameParts) > 1 :
+           'The key of custom_logo must provide a filename with a valid filename extension';
+    name
+  else
+    '';
+
+
 // Extract route config from console spec, this allows legacy
 // configs to work unchanged
 local consoleRoute =
@@ -74,11 +87,11 @@ local consoleSpec =
       {}
   ) +
   (
-    if std.length(std.objectFields(params.custom_logo)) > 0 then
+    if logoFileName != '' then
       {
         customization+: {
           customLogoFile: {
-            key: std.objectFields(params.custom_logo)[0],
+            key: logoFileName,
             name: 'console-logo',
           },
         },
@@ -152,7 +165,7 @@ local tls = import 'tls.libsonnet';
   },
   [if std.length(tls.secrets) > 0 then '01_tls_secrets']: tls.secrets,
   [if std.length(tls.certs) > 0 then '01_certs']: tls.certs,
-  [if std.length(std.objectFields(params.custom_logo)) > 0 then '01_logo']:
+  [if logoFileName != '' then '01_logo']:
     kube.ConfigMap('console-logo') {
       metadata+: {
         // ConfigMap must be deployed in namespace openshift-config

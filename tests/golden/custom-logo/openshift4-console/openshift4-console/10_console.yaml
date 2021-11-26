@@ -1,0 +1,14 @@
+apiVersion: operator.openshift.io/v1
+kind: Console
+metadata:
+  annotations: {}
+  labels:
+    name: cluster
+  name: cluster
+spec:
+  customization:
+    customLogoFile:
+      key: logo.png
+      name: console-logo
+    customProductName: Company Cloud
+  managementState: Managed

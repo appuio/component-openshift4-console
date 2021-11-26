@@ -72,6 +72,22 @@ The value of the entry will be used as the `ConsoleLink` specification.
 Entries with `null` values are skipped.
 This allows users to remove links which were configured higher up in the hierarchy.
 
+== `custom_logo`
+
+[horizontal]
+type:: dictionary
+default:: `{}`
+
+Add a custom logo to the console.
+Takes a single key with the filename and the value is the base64 encoded logo.
+The logo can be a file in any common image format, including GIF, JPG, PNG, or SVG, and is constrained to a max-height of 60px
+The filename needs to have a filename extension which matches the image format.
+
+[NOTE]
+====
+For SVG logos the file must *not* be base64 encoded, but inserted directly as a string.
+====
+
 == `secrets`
 
 [horizontal]
@@ -158,7 +174,7 @@ openshift4_console:
 ----
 
 
-=== Example: Custom links in the web console
+=== Example: Custom links and logo in the web console
 
 [source,yaml]
 ----
@@ -184,7 +200,11 @@ openshift4_console:
         matchExpressions:
          - key: organization
            operation: Exists
+  custom_logo:
+    logo.png: |- <4>
+      <base64-encoded_logo>
 ----
 <1> Adds a link to an overflow menu at the top of every page
 <2> Adds a link to the help menu at the top of every page
-<3> Adds a link to the the dashboard of every namespace with a label `organization`
+<3> Adds a link to the dashboard of every namespace with a label `organization`
+<4> Provide a single base64-encoded logo and the key needs to have the correct filename extension

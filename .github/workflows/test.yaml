@@ -37,6 +37,7 @@ jobs:
           - custom-route-4.7
           - custom-route-legacy
           - custom-route-legacy-4.7
+          - custom-route-managed-tls
           - custom-links
     defaults:
       run:
@@ -57,6 +58,7 @@ jobs:
           - custom-route-4.7
           - custom-route-legacy
           - custom-route-legacy-4.7
+          - custom-route-managed-tls
           - custom-links
     defaults:
       run:

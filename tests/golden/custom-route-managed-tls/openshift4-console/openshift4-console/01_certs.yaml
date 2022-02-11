@@ -5,7 +5,7 @@ metadata:
   labels:
     name: console-cluster-example-org-tls
   name: console-cluster-example-org-tls
-  namespace: openshift-config
+  namespace: openshift-console
 spec:
   dnsNames:
     - console.cluster.example.org
@@ -13,3 +13,28 @@ spec:
     kind: ClusterIssuer
     name: letsencrypt-staging
   secretName: console-cluster-example-org-tls
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  annotations: {}
+  labels:
+    name: openshift4-console-sync-console-cluster-example-org-tls
+  name: openshift4-console-sync-console-cluster-example-org-tls
+spec:
+  rules:
+    - generate:
+        clone:
+          name: console-cluster-example-org-tls
+          namespace: openshift-console
+        kind: Secret
+        name: console-cluster-example-org-tls
+        namespace: '{{request.object.metadata.name}}'
+        synchronize: true
+      match:
+        resources:
+          annotations:
+            syn.tools/openshift4-console: secret-target-namespace
+          kinds:
+            - Namespace
+      name: Sync "console-cluster-example-org-tls" certificate secret to openshift-config

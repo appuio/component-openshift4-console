@@ -1,3 +1,5 @@
+applications:
+  - kyverno
 parameters:
   kapitan:
     dependencies:
@@ -7,6 +9,9 @@ parameters:
       - type: https
         source: https://raw.githubusercontent.com/projectsyn/component-resource-locker/v2.3.2/lib/resource-locker.libjsonnet
         output_path: vendor/lib/resource-locker.libjsonnet
+      - type: https
+        source: https://raw.githubusercontent.com/projectsyn/component-kyverno/v1.4.0/lib/kyverno.libsonnet
+        output_path: vendor/lib/kyverno.libsonnet
 
   resource_locker:
     namespace: syn-resource-locker

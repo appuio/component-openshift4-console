@@ -153,6 +153,48 @@ local consoleRoutePatch =
 
 local tls = import 'tls.libsonnet';
 
+// If we deploy cert-manager Certificates, we annotate namespace
+// openshift-config with the `kyvernoAnnotation` defined in `tls.libsonnet`
+// through a ResourceLocker patch. This triggers the the Kyverno policy to
+// copy the cert-manager TLS secrets into namespace openshift-config.
+//
+// We add the ResourceLocker patch to ArgoCD sync-wave 5, so it's guaranteed
+// to be applied in the cluster after the certificate has been issued and
+// before the custom openshift console route config is applied.
+//
+// NOTE: Due to the current implementation of the resource locker component
+// library this prevents other components from also providing ResourceLocker
+// patches for the `openshift-config` namespace.
+local openshiftConfigNsAnnotationPatch =
+  local needsPatch = hostname != null && std.length(tls.certs) > 0;
+  if needsPatch then
+    local target = kube.Namespace('openshift-config');
+    local patch = {
+      metadata: {
+        annotations: tls.kyvernoAnnotation,
+      },
+    };
+    [
+      if obj.kind == 'ResourceLocker' then
+        obj {
+          metadata+: {
+            annotations+: {
+              // Annotate namespace openshift-config before we configure the
+              // route certificate, see patch above
+              'argocd.argoproj.io/sync-wave': '5',
+            },
+          },
+        }
+      else
+        obj
+      for obj in
+        rl.Patch(
+          target,
+          patch,
+          patchstrategy='application/merge-patch+json'
+        )
+    ];
+
 {
   '00_namespace': kube.Namespace(params.namespace) {
     metadata+: {
@@ -184,4 +226,6 @@ local tls = import 'tls.libsonnet';
   },
   [if !oldConfig && consoleRoutePatch != null then '20_ingress_config_patch']:
     consoleRoutePatch,
+  [if openshiftConfigNsAnnotationPatch != null then '20_openshift_config_ns_annotation_patch']:
+    openshiftConfigNsAnnotationPatch,
 }

@@ -5,7 +5,7 @@ parameters:
         source: https://raw.githubusercontent.com/projectsyn/component-cert-manager/v2.2.0/lib/cert-manager.libsonnet
         output_path: vendor/lib/cert-manager.libsonnet
       - type: https
-        source: https://raw.githubusercontent.com/projectsyn/component-resource-locker/v2.1.0/lib/resource-locker.libjsonnet
+        source: https://raw.githubusercontent.com/projectsyn/component-resource-locker/v2.3.2/lib/resource-locker.libjsonnet
         output_path: vendor/lib/resource-locker.libjsonnet
 
   resource_locker:

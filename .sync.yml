@@ -18,6 +18,3 @@ docs/antora.yml:
 
 .github/workflows/test.yaml:
   goldenTest_makeTarget: golden-diff -e instance=${{ matrix.instance }}
-Makefile:
-  includes:
-    - Makefile.additional.mk

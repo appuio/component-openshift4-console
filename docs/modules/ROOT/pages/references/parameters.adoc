@@ -2,6 +2,27 @@
 
 The parent key for all of the following parameters is `openshift4_console`.
 
+== `namespace`
+
+[horizontal]
+type:: string
+default:: `openshift-console`
+
+The namespace where the console is deployed.
+
+== `namespace_annotations`
+
+type:: dictionary
+default::
++
+[source,yaml]
+----
+openshift.io/node-selector: node-role.kubernetes.io/master=
+----
+
+Annotations to add to the managed namespace.
+Annotations can be removed by setting the value to `null`.
+
 == `openshift_version`
 
 [horizontal]

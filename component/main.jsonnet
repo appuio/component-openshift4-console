@@ -198,7 +198,7 @@ local openshiftConfigNsAnnotationPatch =
 {
   '00_namespace': kube.Namespace(params.namespace) {
     metadata+: {
-      annotations:: {},
+      annotations: std.prune(params.namespace_annotations),
       [if std.member(inv.applications, 'networkpolicy') then 'labels']+: {
         [inv.parameters.networkpolicy.labels.noDefaults]: 'true',
         [inv.parameters.networkpolicy.labels.purgeDefaults]: 'true',

@@ -1,4 +1,13 @@
 parameters:
+  kapitan:
+    dependencies:
+      - type: https
+        source: https://raw.githubusercontent.com/projectsyn/component-resource-locker/v2.3.2/lib/resource-locker.libjsonnet
+        output_path: vendor/lib/resource-locker.libjsonnet
+
+  resource_locker:
+    namespace: syn-resource-locker
+
   openshift4_console:
     openshift_version: '4.7'
     config:

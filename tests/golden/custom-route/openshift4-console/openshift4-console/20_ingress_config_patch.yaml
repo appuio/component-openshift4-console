@@ -2,16 +2,16 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
-    name: cluster-manager
-  name: cluster-manager
+    name: ingress-config-openshift-io-cluster-manager
+  name: ingress-config-openshift-io-cluster-manager
   namespace: syn-resource-locker
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    name: syn-resource-locker-cluster-manager
-  name: syn-resource-locker-cluster-manager
+    name: syn-resource-locker-ingress-config-openshift-io-cluster-manager
+  name: syn-resource-locker-ingress-config-openshift-io-cluster-manager
 rules:
   - apiGroups:
       - config.openshift.io
@@ -27,15 +27,15 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   labels:
-    name: syn-resource-locker-cluster-manager
-  name: syn-resource-locker-cluster-manager
+    name: syn-resource-locker-ingress-config-openshift-io-cluster-manager
+  name: syn-resource-locker-ingress-config-openshift-io-cluster-manager
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: syn-resource-locker-cluster-manager
+  name: syn-resource-locker-ingress-config-openshift-io-cluster-manager
 subjects:
   - kind: ServiceAccount
-    name: cluster-manager
+    name: ingress-config-openshift-io-cluster-manager
     namespace: syn-resource-locker
 ---
 apiVersion: redhatcop.redhat.io/v1alpha1
@@ -45,8 +45,8 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: '10'
   labels:
-    name: cluster
-  name: cluster
+    name: ingress-config-openshift-io-cluster
+  name: ingress-config-openshift-io-cluster
   namespace: syn-resource-locker
 spec:
   patches:
@@ -60,4 +60,4 @@ spec:
         kind: Ingress
         name: cluster
   serviceAccountRef:
-    name: cluster-manager
+    name: ingress-config-openshift-io-cluster-manager

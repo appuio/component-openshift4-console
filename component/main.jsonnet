@@ -195,6 +195,23 @@ local openshiftConfigNsAnnotationPatch =
         )
     ];
 
+
+local downloadsInfraNodeSelectorPatch = rl.Patch(kube._Object('apps/v1', 'Deployment', 'downloads') {
+  metadata+: {
+    namespace: params.namespace,
+  },
+}, {
+  spec: {
+    template: {
+      spec: {
+        nodeSelector: {
+          'node-role.kubernetes.io/infra': '',
+        },
+      },
+    },
+  },
+});
+
 {
   '00_namespace': kube.Namespace(params.namespace) {
     metadata+: {
@@ -228,4 +245,6 @@ local openshiftConfigNsAnnotationPatch =
     consoleRoutePatch,
   [if openshiftConfigNsAnnotationPatch != null then '20_openshift_config_ns_annotation_patch']:
     openshiftConfigNsAnnotationPatch,
+
+  '30_console_downloads_infra_node_selector_patch': downloadsInfraNodeSelectorPatch,
 }

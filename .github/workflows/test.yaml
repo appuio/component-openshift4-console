@@ -39,6 +39,7 @@ jobs:
           - custom-route-legacy-4.7
           - custom-route-managed-tls
           - custom-links
+          - custom-logo
     defaults:
       run:
         working-directory: ${{ env.COMPONENT_NAME }}
@@ -60,6 +61,7 @@ jobs:
           - custom-route-legacy-4.7
           - custom-route-managed-tls
           - custom-links
+          - custom-logo
     defaults:
       run:
         working-directory: ${{ env.COMPONENT_NAME }}

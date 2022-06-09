@@ -1,5 +1,5 @@
 :global:
-  componentName: openshift4-console
+  componentName: OpenShift4 Console
   feature_goldenTests: true
   testMatrix:
     key: instance
@@ -11,10 +11,6 @@
       - custom-route-legacy-4.7
       - custom-route-managed-tls
       - custom-links
-
-docs/antora.yml:
-  name: openshift4-console
-  title: OpenShift4 Console
 
 .github/workflows/test.yaml:
   goldenTest_makeTarget: golden-diff -e instance=${{ matrix.instance }}

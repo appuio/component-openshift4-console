@@ -1,6 +1,19 @@
 parameters:
+  kapitan:
+    dependencies:
+      - type: https
+        source: https://raw.githubusercontent.com/projectsyn/component-resource-locker/v2.1.0/lib/resource-locker.libjsonnet
+        output_path: vendor/lib/resource-locker.libjsonnet
+
+  resource_locker:
+    namespace: syn-resource-locker
+
   openshift4_console:
     config:
+      route:
+        hostname: console.company.cloud
+        secret:
+          name: console-company-cloud-tls
       customization:
         customProductName: Company Cloud
     custom_logo:

@@ -114,6 +114,13 @@ The filename needs to have a filename extension which matches the image format.
 For SVG logos the file must *not* be base64 encoded, but inserted directly as a string.
 ====
 
+By default, OCP won't serve a favicon if a custom logo is configured for the console.
+This is an intentional design decision as documented in this https://bugzilla.redhat.com/show_bug.cgi?id=1844883#c1[bug report].
+
+The component tries to ensure that a favicon is served even if a custom logo is configured.
+However, because the current workaround for the missing favicon requires an additional custom route for the console hostname, it can only be implemented for configurations which use a custom console hostname.
+Otherwise, the component is unable to correctly configure `spec.hostname` for the console.
+
 == `secrets`
 
 [horizontal]

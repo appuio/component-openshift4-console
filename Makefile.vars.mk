@@ -41,4 +41,4 @@ COMPILE_CMD    ?= $(COMMODORE_CMD) component compile . $(commodore_args)
 JB_CMD         ?= $(DOCKER_CMD) $(DOCKER_ARGS) --entrypoint /usr/local/bin/jb docker.io/projectsyn/commodore:latest install
 
 instance ?= defaults
-test_instances = tests/defaults.yml tests/custom-route.yml tests/custom-route-4.7.yml tests/custom-route-legacy.yml tests/custom-route-legacy-4.7.yml tests/custom-route-managed-tls.yml tests/custom-links.yml
+test_instances = tests/defaults.yml tests/custom-route.yml tests/custom-route-4.7.yml tests/custom-route-legacy.yml tests/custom-route-legacy-4.7.yml tests/custom-route-managed-tls.yml tests/custom-links.yml tests/custom-logo.yml

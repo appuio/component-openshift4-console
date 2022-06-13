@@ -100,6 +100,38 @@ local consoleSpec =
       {}
   );
 
+local faviconRoute =
+  if logoFileName != '' && hostname != null then
+    kube._Object('route.openshift.io/v1', 'Route', 'console-favicon') {
+      metadata+: {
+        namespace: 'openshift-console',
+        labels+: {
+          app: 'console',
+        },
+        annotations+: {
+          'haproxy.router.openshift.io/rewrite-target':
+            '/static/assets/openshift-favicon.png',
+        },
+      },
+      spec: {
+        host: hostname,
+        path: '/favicon.ico',
+        to: {
+          kind: 'Service',
+          name: 'console',
+          weight: 100,
+        },
+        port: {
+          targetPort: 'https',
+        },
+        tls: {
+          termination: 'reencrypt',
+          insecureEdgeTerminationPolicy: 'Redirect',
+        },
+        wildcardPolicy: 'None',
+      },
+    };
+
 // Create ResourceLocker patch to configure console route in
 // ingress.config.openshift.io/cluster object
 local consoleRoutePatch =
@@ -224,6 +256,8 @@ local openshiftConfigNsAnnotationPatch =
   '10_console': kube._Object(versionGroup, 'Console', 'cluster') {
     spec+: consoleSpec,
   },
+  [if faviconRoute != null then '10_console_favicon_route']:
+    faviconRoute,
   [if !oldConfig && consoleRoutePatch != null then '20_ingress_config_patch']:
     consoleRoutePatch,
   [if openshiftConfigNsAnnotationPatch != null then '20_openshift_config_ns_annotation_patch']:

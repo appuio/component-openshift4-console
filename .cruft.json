@@ -1,0 +1,21 @@
+{
+  "template": "https://github.com/projectsyn/commodore-component-template.git",
+  "commit": "e6c4fd69190db1ad12e941d578b9423d0e2f993c",
+  "checkout": "main",
+  "context": {
+    "cookiecutter": {
+      "name": "OpenShift4 Console",
+      "slug": "openshift4-console",
+      "parameter_key": "openshift4_console",
+      "test_cases": "defaults custom-route custom-route-4.7 custom-route-legacy custom-route-legacy-4.7 custom-route-managed-tls custom-links custom-logo",
+      "add_golden": "y",
+      "add_matrix": "y",
+      "add_go_unit": "n",
+      "github_owner": "appuio",
+      "github_name": "component-openshift4-console",
+      "github_url": "https://github.com/appuio/component-openshift4-console",
+      "_template": "https://github.com/projectsyn/commodore-component-template.git"
+    }
+  },
+  "directory": null
+}

@@ -14,7 +14,11 @@
       "github_owner": "appuio",
       "github_name": "component-openshift4-console",
       "github_url": "https://github.com/appuio/component-openshift4-console",
-      "_template": "https://github.com/projectsyn/commodore-component-template.git"
+      "_template": "https://github.com/projectsyn/commodore-component-template.git",
+      "add_lib": "n",
+      "add_pp": "n",
+      "copyright_holder": "VSHN AG <info@vshn.ch>",
+      "copyright_year": "2021"
     }
   },
   "directory": null

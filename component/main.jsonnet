@@ -162,7 +162,7 @@ local consoleRoutePatch =
       },
     };
     [
-      if obj.kind == 'ResourceLocker' then
+      if std.member([ 'ResourceLocker', 'Patch' ], obj.kind) then
         obj {
           metadata+: {
             annotations+: {
@@ -207,7 +207,7 @@ local openshiftConfigNsAnnotationPatch =
       },
     };
     [
-      if obj.kind == 'ResourceLocker' then
+      if std.member([ 'ResourceLocker', 'Patch' ], obj.kind) then
         obj {
           metadata+: {
             annotations+: {

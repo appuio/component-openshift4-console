@@ -78,7 +78,7 @@ local consoleSpec =
     for k in std.objectFields(params.config)
     if k != 'route'
   } + {
-    [if !std.objectHas(params.config, 'plugins') then 'plugins']: [],
+    plugins+: [],
   } +
   (
     // Inject route config using both parameters in consoleSpec on OCP4.7 and

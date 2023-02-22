@@ -1,0 +1,5 @@
+parameters:
+  openshift4_console:
+    config:
+      plugins:
+        - example-plugin

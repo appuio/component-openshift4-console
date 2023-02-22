@@ -1,0 +1,6 @@
+spec:
+  ignoreDifferences:
+    - group: operator.openshift.io
+      jsonPointers:
+        - /spec/plugins
+      kind: Console

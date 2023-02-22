@@ -69,6 +69,21 @@ default:: `Managed`
 
 Indicates whether and how the operator should manage the console.
 
+=== `config.plugins`
+
+[horizontal]
+type:: list
+default:: `[]`
+
+Add plugins to the console.
+
+[IMPORTANT]
+====
+While adding custom plugins is supported, Argo CD will ignore differences to allow other components to patch this field.
+
+Manual syncs in Argo CD may be necessary.
+====
+
 === `config.route`
 
 [horizontal]

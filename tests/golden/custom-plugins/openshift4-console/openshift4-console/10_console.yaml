@@ -7,6 +7,5 @@ metadata:
   name: cluster
 spec:
   managementState: Managed
-  plugins: []
-  route:
-    hostname: console.cluster.example.org
+  plugins:
+    - example-plugin

@@ -51,8 +51,12 @@ metadata:
 spec:
   patches:
     - id: patch1
-      patchTemplate: "\"spec\":\n  \"componentRoutes\":\n  - \"hostname\": \"console.cluster.example.org\"\
-        \n    \"name\": \"console\"\n    \"namespace\": \"openshift-console\""
+      patchTemplate: |-
+        "spec":
+          "componentRoutes":
+          - "hostname": "console.cluster.example.org"
+            "name": "console"
+            "namespace": "openshift-console"
       patchType: application/merge-patch+json
       targetObjectRef:
         apiVersion: config.openshift.io/v1

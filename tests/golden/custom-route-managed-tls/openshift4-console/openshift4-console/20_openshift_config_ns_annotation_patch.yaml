@@ -51,8 +51,10 @@ metadata:
 spec:
   patches:
     - id: patch1
-      patchTemplate: "\"metadata\":\n  \"annotations\":\n    \"syn.tools/openshift4-console\"\
-        : \"secret-target-namespace\""
+      patchTemplate: |-
+        "metadata":
+          "annotations":
+            "syn.tools/openshift4-console": "secret-target-namespace"
       patchType: application/merge-patch+json
       targetObjectRef:
         apiVersion: v1

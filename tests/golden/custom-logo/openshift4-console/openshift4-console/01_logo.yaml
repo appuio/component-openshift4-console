@@ -1,38 +1,23 @@
 apiVersion: v1
 data:
-  logo.png: 'V2FpdCB0aGlzIGlzbid0IGEgcGljdHVyZS4uCgpMb3JlbSBpcHN1bSBkb2xvciBzaXQgYW1ldC4g
-
+  logo.png: |-
+    V2FpdCB0aGlzIGlzbid0IGEgcGljdHVyZS4uCgpMb3JlbSBpcHN1bSBkb2xvciBzaXQgYW1ldC4g
     VmVsIGFjY3VzYW50aXVtIGFwZXJpYW0gc2VkIG9tbmlzIG1vbGVzdGlhZSBldW0gb21uaXMgaXBz
-
     YW0gdmVsIGVhcXVlIG5lbW8gdXQgcXVpYSB2b2x1cHRhcyBldCBtb2xlc3RpYWUgY29ycnVwdGkg
-
     Y3VtIHBsYWNlYXQgcXVpYnVzZGFtLiBBdXQgZG9sb3J1bSBkb2xvcmVtIGlkIGZ1Z2EgY29uc2Vx
-
     dWF0dXIgZXQgY29tbW9kaSBsYWJvcmlvc2FtIGF1dCBzaW50IGFuaW1pIGN1bSBlcnJvciBxdW9k
-
     IGF1dCBxdWFtIG1pbnVzIGV0IGxhYm9yZSBjb3Jwb3Jpcy4gRXQgcGVyc3BpY2lhdGlzIHF1b2Qg
-
     YWQgYXJjaGl0ZWN0byBjdXBpZGl0YXRlIGV1bSBmdWdpYXQgZXhlcmNpdGF0aW9uZW0uIEV0IG5p
-
     c2kgbmVzY2l1bnQgcXVpIGRpZ25pc3NpbW9zIGlwc3VtIHNlZCBkdWNpbXVzIHF1aWEgdXQgcmVp
-
     Y2llbmRpcyBhbmltaSBhdXQgYWxpcXVhbSBhbWV0IGVzdCBjb25zZXF1YXR1ciBtYWduaSBzZWQg
-
     cXVhZXJhdCBhZGlwaXNjaS4KClNlZCBvcHRpbyBub3N0cnVtIHF1aSBhY2N1c2FtdXMgbGFib3Jl
-
     IHV0IHZvbHVwdGFzIGxhdWRhbnRpdW0gaWQgdGVtcG9yaWJ1cyBvZmZpY2lhIHZlbCBxdWFzIGlt
-
     cGVkaXQgYWIgdm9sdXB0YXRlbSBkZWJpdGlzIHF1byBkdWNpbXVzIGR1Y2ltdXMhIFNpdCBtYWdu
-
     aSBuZXF1ZSB1dCB2ZW5pYW0gUXVpcyBpbiBwcm92aWRlbnQgcXVvcyBhdXQgaXRhcXVlIGV4cGVk
-
     aXRhLgoKUXVvIGRvbG9yZW0gcmVwZWxsZW5kdXMgZXQgcmVydW0gbmVxdWUgdmVsIHRlbXBvcmli
-
     dXMgaW5jaWR1bnQgZXQgcGVyc3BpY2lhdGlzIGV4ZXJjaXRhdGlvbmVtLiBFdCBhc3Blcm5hdHVy
-
     IGxhYm9yZSByZXByZWhlbmRlcml0IHNpbnQgZXN0IGFjY3VzYW11cyBleGVyY2l0YXRpb25lbSBp
-
-    biBxdWFzIHZvbHVwdGF0ZW0gZWEgbmVzY2l1bnQgZGVzZXJ1bnQuCg=='
+    biBxdWFzIHZvbHVwdGF0ZW0gZWEgbmVzY2l1bnQgZGVzZXJ1bnQuCg==
 kind: ConfigMap
 metadata:
   annotations:

@@ -51,9 +51,14 @@ metadata:
 spec:
   patches:
     - id: patch1
-      patchTemplate: "\"spec\":\n  \"componentRoutes\":\n  - \"hostname\": \"console.company.cloud\"\
-        \n    \"name\": \"console\"\n    \"namespace\": \"openshift-console\"\n  \
-        \  \"servingCertKeyPairSecret\":\n      \"name\": \"console-company-cloud-tls\""
+      patchTemplate: |-
+        "spec":
+          "componentRoutes":
+          - "hostname": "console.company.cloud"
+            "name": "console"
+            "namespace": "openshift-console"
+            "servingCertKeyPairSecret":
+              "name": "console-company-cloud-tls"
       patchType: application/merge-patch+json
       targetObjectRef:
         apiVersion: config.openshift.io/v1

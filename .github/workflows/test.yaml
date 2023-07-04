@@ -35,9 +35,7 @@ jobs:
           - defaults
           - custom-plugins
           - custom-route
-          - custom-route-4.7
           - custom-route-legacy
-          - custom-route-legacy-4.7
           - custom-route-managed-tls
           - custom-links
           - custom-logo
@@ -58,9 +56,7 @@ jobs:
           - defaults
           - custom-plugins
           - custom-route
-          - custom-route-4.7
           - custom-route-legacy
-          - custom-route-legacy-4.7
           - custom-route-managed-tls
           - custom-links
           - custom-logo

@@ -3,7 +3,6 @@ parameters:
     namespace: openshift-console
     namespace_annotations:
       openshift.io/node-selector: node-role.kubernetes.io/master=
-    openshift_version: '4.8'
     route:
       console: {}
       downloads: {}

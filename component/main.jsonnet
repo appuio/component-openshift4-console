@@ -5,24 +5,6 @@ local rl = import 'lib/resource-locker.libjsonnet';
 local inv = kap.inventory();
 local params = inv.parameters.openshift4_console;
 
-local clusterVersion =
-  local verparts = std.map(
-    std.parseInt,
-    std.split(params.openshift_version, '.')
-  );
-  if verparts[0] != 4 then
-    error 'This component only supports OCP4'
-  else
-    assert
-      std.length(verparts) > 1 :
-      'The parameter openshift_version must provide the OCP version as "<major>.<minor>"';
-    {
-      major: verparts[0],
-      minor: verparts[1],
-    };
-
-local oldConfig = clusterVersion.minor < 8;
-
 local versionGroup = 'operator.openshift.io/v1';
 
 local logoFileName =
@@ -62,15 +44,6 @@ local tlsSecret =
   else
     null;
 
-local oldRouteCfg =
-  if hostname != null then
-    {
-      hostname: hostname,
-      [if tlsSecret != null then 'secret']: tlsSecret,
-    }
-  else
-    {};
-
 local consoleSpec =
   // Remove provided route config from console `.spec`
   {
@@ -80,14 +53,6 @@ local consoleSpec =
   } + {
     plugins+: [],
   } +
-  (
-    // Inject route config using both parameters in consoleSpec on OCP4.7 and
-    // older.
-    if oldConfig then
-      { route: oldRouteCfg }
-    else
-      {}
-  ) +
   (
     if logoFileName != '' then
       {
@@ -260,7 +225,7 @@ local openshiftConfigNsAnnotationPatch =
   },
   [if faviconRoute != null then '10_console_favicon_route']:
     faviconRoute,
-  [if !oldConfig && consoleRoutePatch != null then '20_ingress_config_patch']:
+  [if consoleRoutePatch != null then '20_ingress_config_patch']:
     consoleRoutePatch,
   [if openshiftConfigNsAnnotationPatch != null then '20_openshift_config_ns_annotation_patch']:
     openshiftConfigNsAnnotationPatch,

@@ -1,9 +1,0 @@
-parameters:
-  openshift4_console:
-    openshift_version: '4.7'
-    route:
-      console:
-        hostname: console.cluster.example.org
-    config:
-      route:
-        hostname: console.cluster.example.com

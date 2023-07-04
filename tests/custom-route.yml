@@ -2,11 +2,13 @@ parameters:
   kapitan:
     dependencies:
       - type: https
-        source: https://raw.githubusercontent.com/projectsyn/component-resource-locker/v2.1.0/lib/resource-locker.libjsonnet
-        output_path: vendor/lib/resource-locker.libjsonnet
+        source: https://raw.githubusercontent.com/projectsyn/component-patch-operator/v1.2.0/lib/patch-operator.libsonnet
+        output_path: vendor/lib/patch-operator.libsonnet
 
-  resource_locker:
-    namespace: syn-resource-locker
+  patch_operator:
+    patch_serviceaccount:
+      name: patch-sa
+    namespace: syn-patch-operator
 
   openshift4_console:
     route:

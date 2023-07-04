@@ -1,56 +1,16 @@
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  labels:
-    name: namespace-openshift-config-manager
-  name: namespace-openshift-config-manager
-  namespace: syn-resource-locker
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  labels:
-    name: syn-resource-locker-namespace-openshift-config-manager
-  name: syn-resource-locker-namespace-openshift-config-manager
-rules:
-  - apiGroups:
-      - ''
-    resources:
-      - namespaces
-    verbs:
-      - get
-      - list
-      - patch
-      - watch
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  labels:
-    name: syn-resource-locker-namespace-openshift-config-manager
-  name: syn-resource-locker-namespace-openshift-config-manager
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: syn-resource-locker-namespace-openshift-config-manager
-subjects:
-  - kind: ServiceAccount
-    name: namespace-openshift-config-manager
-    namespace: syn-resource-locker
----
 apiVersion: redhatcop.redhat.io/v1alpha1
-kind: ResourceLocker
+kind: Patch
 metadata:
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: '5'
   labels:
-    name: namespace-openshift-config
-  name: namespace-openshift-config
-  namespace: syn-resource-locker
+    name: namespace-openshift-config-2c8343f13594d63
+  name: namespace-openshift-config-2c8343f13594d63
+  namespace: syn-patch-operator
 spec:
   patches:
-    - id: patch1
+    namespace-openshift-config-2c8343f13594d63-patch:
       patchTemplate: |-
         "metadata":
           "annotations":
@@ -61,4 +21,4 @@ spec:
         kind: Namespace
         name: openshift-config
   serviceAccountRef:
-    name: namespace-openshift-config-manager
+    name: patch-sa

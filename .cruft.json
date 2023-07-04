@@ -7,7 +7,7 @@
       "name": "OpenShift4 Console",
       "slug": "openshift4-console",
       "parameter_key": "openshift4_console",
-      "test_cases": "defaults custom-plugins custom-route custom-route-4.7 custom-route-legacy custom-route-managed-tls custom-links custom-logo",
+      "test_cases": "defaults custom-plugins custom-route custom-route-legacy custom-route-managed-tls custom-links custom-logo",
       "add_lib": "n",
       "add_pp": "n",
       "add_golden": "y",

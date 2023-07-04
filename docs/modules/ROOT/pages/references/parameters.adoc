@@ -27,19 +27,6 @@ openshift.io/node-selector: node-role.kubernetes.io/master=
 Annotations to add to the managed namespace.
 Annotations can be removed by setting the value to `null`.
 
-
-== `openshift_version`
-
-[horizontal]
-type:: string
-default:: `4.8`
-
-The component uses this parameter to select the appropriate recommended way to configure a custom console hostname.
-
-On OpenShift 4.7 and older, the values provided for parameters `config.route` or `route` are inserted into the `console.operator.openshift.io/cluster` custom resource.
-
-On OpenShift 4.8 and newer, the values provided for the parameters are configured in `spec.componentRoutes` of the `ingress.config.openshift.io/cluster` custom resource.
-
 == `route`
 
 [horizontal]

@@ -1,6 +1,6 @@
 local kap = import 'lib/kapitan.libjsonnet';
 local kube = import 'lib/kube.libjsonnet';
-local rl = import 'lib/resource-locker.libjsonnet';
+local po = import 'lib/patch-operator.libsonnet';
 
 local inv = kap.inventory();
 local params = inv.parameters.openshift4_console;
@@ -129,7 +129,7 @@ local consoleRoutePatch =
       },
     };
     [
-      if std.member([ 'ResourceLocker', 'Patch' ], obj.kind) then
+      if obj.kind == 'Patch' then
         obj {
           metadata+: {
             annotations+: {
@@ -141,7 +141,7 @@ local consoleRoutePatch =
         }
       else
         obj
-      for obj in rl.Patch(
+      for obj in po.Patch(
         target,
         patch,
         patchstrategy='application/merge-patch+json'
@@ -174,7 +174,7 @@ local openshiftConfigNsAnnotationPatch =
       },
     };
     [
-      if std.member([ 'ResourceLocker', 'Patch' ], obj.kind) then
+      if obj.kind == 'Patch' then
         obj {
           metadata+: {
             annotations+: {
@@ -187,7 +187,7 @@ local openshiftConfigNsAnnotationPatch =
       else
         obj
       for obj in
-        rl.Patch(
+        po.Patch(
           target,
           patch,
           patchstrategy='application/merge-patch+json'

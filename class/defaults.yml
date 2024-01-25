@@ -2,7 +2,7 @@ parameters:
   openshift4_console:
     namespace: openshift-console
     namespace_annotations:
-      openshift.io/node-selector: node-role.kubernetes.io/master=
+      openshift.io/node-selector: ''
     route:
       console: {}
       downloads: {}

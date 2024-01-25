@@ -12,4 +12,5 @@ spec:
       name: console-logo
     customProductName: Company Cloud
   managementState: Managed
-  plugins: []
+  plugins:
+    - monitoring-plugin

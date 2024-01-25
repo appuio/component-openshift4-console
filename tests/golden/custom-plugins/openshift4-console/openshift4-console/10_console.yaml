@@ -8,4 +8,5 @@ metadata:
 spec:
   managementState: Managed
   plugins:
+    - monitoring-plugin
     - example-plugin

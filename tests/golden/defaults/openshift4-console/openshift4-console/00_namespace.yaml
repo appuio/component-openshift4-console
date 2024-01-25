@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Namespace
 metadata:
   annotations:
-    openshift.io/node-selector: node-role.kubernetes.io/master=
+    openshift.io/node-selector: ''
   labels:
     name: openshift-console
   name: openshift-console

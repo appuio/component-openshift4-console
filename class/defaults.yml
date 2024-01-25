@@ -2,12 +2,16 @@ parameters:
   openshift4_console:
     namespace: openshift-console
     namespace_annotations:
-      openshift.io/node-selector: node-role.kubernetes.io/master=
+      # OCP 4.14 wants node-selector='', if we set anything else we cause a
+      # reconcile loop
+      openshift.io/node-selector: ''
     route:
       console: {}
       downloads: {}
     config:
       managementState: Managed
+      plugins:
+        - monitoring-plugin
 
     secrets: {}
     cert_manager_certs: {}

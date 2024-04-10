@@ -3,6 +3,9 @@ parameters:
     namespace: openshift-console
     namespace_annotations:
       openshift.io/node-selector: ''
+    openshift_version:
+      Major: '4'
+      Minor: '13'
     route:
       console: {}
       downloads: {}

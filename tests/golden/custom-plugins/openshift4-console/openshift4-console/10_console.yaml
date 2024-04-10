@@ -9,3 +9,4 @@ spec:
   managementState: Managed
   plugins:
     - example-plugin
+    - foo-bar

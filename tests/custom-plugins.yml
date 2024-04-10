@@ -2,4 +2,6 @@ parameters:
   openshift4_console:
     config:
       plugins:
+        - foo-bar
+        - example-plugin
         - example-plugin

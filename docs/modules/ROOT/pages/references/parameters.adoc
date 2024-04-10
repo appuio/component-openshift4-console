@@ -21,11 +21,26 @@ default::
 +
 [source,yaml]
 ----
-openshift.io/node-selector: node-role.kubernetes.io/master=
+openshift.io/node-selector: ''
 ----
 
 Annotations to add to the managed namespace.
 Annotations can be removed by setting the value to `null`.
+
+== `openshift_version`
+
+type:: dictionary
+default::
++
+[source,yaml]
+----
+Major: '4'
+Minor: '13'
+----
+
+The OpenShift major and minor version.
+
+TIP: This parameter is intended to be populated from the `openshiftVersion` dynamic fact and replicates the fact's structure.
 
 == `route`
 
@@ -60,9 +75,15 @@ Indicates whether and how the operator should manage the console.
 
 [horizontal]
 type:: list
-default:: `[]`
+default:: dynamic, depending on the reported OpenShift version
 
 Add plugins to the console.
+
+The component will inject a dynamic set of plugins into the configuration based on the reported OpenShift version in parameter `openshift_version`.
+For OpenShift 4.14 and newer, the component always adds plugin `monitoring-plugin`.
+Additionally, the component will remove duplicated entries from the list of configured plugins.
+
+NOTE: The order of entries in the field isn't guaranteed to be stable.
 
 === `config.route`
 
@@ -77,7 +98,7 @@ If the route is part of the default apps domain, no TLS cert needs to be specifi
 ====
 This configuration parameter is deprecated starting with OpenShift 4.8, see the https://docs.openshift.com/container-platform/4.8/web_console/customizing-the-web-console.html#customizing-the-console-route_customizing-web-console[upstream documentation].
 
-The component provides support to use the new recommended configuration via the `ingress.config.openshift.io/cluster` object, see the documentation for parameters <<_openshift_version,`openshift_version`>> and <<_route,`route`>>.
+The component always configures the console route via the `ingress.config.openshift.io/cluster` object.
 
 If both this parameter and parameter `route` are present, parameter `route` has precedence over this parameter.
 ====

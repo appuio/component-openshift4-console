@@ -44,14 +44,34 @@ local tlsSecret =
   else
     null;
 
+local consolePlugins =
+  // set default plugins dynamically based on OCP minor version and append
+  // user-configured plugins to the default.
+  local defaults =
+    if std.parseInt(params.openshift_version.Minor) > 13 then
+      [ 'monitoring-plugin' ]
+    else
+      [];
+  // render final plugins list by appending any user-provided plugins that
+  // aren't part of the default plugins to the list of plugins. We use
+  // `std.set()` on the user-provided plugins so that users don't have to
+  // worry about including the same plugin multiple times. Note that this may
+  // reorder plugins between the input and the resulting manifest.
+  defaults + [
+    p
+    for p in std.set(std.get(params.config, 'plugins', []))
+    if !std.member(defaults, p)
+  ];
+
 local consoleSpec =
-  // Remove provided route config from console `.spec`
+  // Remove provided route config from console `.spec`, and skip field
+  // `plugins` since we manage it dynamically.
   {
     [k]: params.config[k]
     for k in std.objectFields(params.config)
-    if k != 'route'
+    if !std.member([ 'route', 'plugins' ], k)
   } + {
-    plugins+: [],
+    plugins: consolePlugins,
   } +
   (
     if logoFileName != '' then

@@ -39,6 +39,7 @@ jobs:
           - custom-route-managed-tls
           - custom-links
           - custom-logo
+          - ocp-4.14
     defaults:
       run:
         working-directory: ${{ env.COMPONENT_NAME }}
@@ -60,6 +61,7 @@ jobs:
           - custom-route-managed-tls
           - custom-links
           - custom-logo
+          - ocp-4.14
     defaults:
       run:
         working-directory: ${{ env.COMPONENT_NAME }}

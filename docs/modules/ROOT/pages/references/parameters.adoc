@@ -169,8 +169,7 @@ The dictionary values are then directly directly merged into the mostly empty `C
 OpenShift won't admit the route for the HTTP01 solver pod unless the `Certificate` resources are deployed in the same namespace as the web console.
 This behavior is caused by a security feature in the OpenShift ingress controller operator to not allow malicious actors to abuse hostnames which are already in use in other namespaces.
 
-However, since OpenShift requires that custom TLS secrets for the OpenShift console are stored in namespace `openshift-config`, we deploy a Kyverno policy to clone the TLS secret created by cert-manager into namespace `openshift-config` for each `Certificate` resource.
-Because of that, the component requires that Kyverno is installed on the cluster via the https://hub.syn.tools/kyverno/[Commodore component `kyverno`], when `Certificate` resources are configured in the hierarchy.
+However, since OpenShift requires that custom TLS secrets for the OpenShift console are stored in namespace `openshift-config`, we deploy a script to clone the TLS secret created by cert-manager into namespace `openshift-config` for each `Certificate` resource.
 
 
 == Example: Custom hostname in cluster's app domain

@@ -1,5 +1,11 @@
 parameters:
   openshift4_console:
+    images:
+      oc:
+        registry: quay.io
+        repository: appuio/oc
+        tag: v4.15
+
     namespace: openshift-console
     namespace_annotations:
       openshift.io/node-selector: ''

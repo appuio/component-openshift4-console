@@ -1,5 +1,3 @@
-applications:
-  - kyverno
 parameters:
   kapitan:
     dependencies:
@@ -9,9 +7,6 @@ parameters:
       - type: https
         source: https://raw.githubusercontent.com/projectsyn/component-patch-operator/v1.2.0/lib/patch-operator.libsonnet
         output_path: vendor/lib/patch-operator.libsonnet
-      - type: https
-        source: https://raw.githubusercontent.com/projectsyn/component-kyverno/v1.4.0/lib/kyverno.libsonnet
-        output_path: vendor/lib/kyverno.libsonnet
 
   patch_operator:
     patch_serviceaccount:

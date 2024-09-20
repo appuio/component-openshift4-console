@@ -2,7 +2,6 @@ local cm = import 'lib/cert-manager.libsonnet';
 local com = import 'lib/commodore.libjsonnet';
 local kap = import 'lib/kapitan.libjsonnet';
 local kube = import 'lib/kube.libjsonnet';
-local kyverno = import 'lib/kyverno.libsonnet';
 
 local inv = kap.inventory();
 local params = inv.parameters.openshift4_console;
@@ -36,52 +35,141 @@ local secrets = std.filter(
   ]
 );
 
-local kyvernoAnnotation = {
-  'syn.tools/openshift4-console': 'secret-target-namespace',
-};
-
 local makeCert(c, cert) =
-  assert
-    std.member(inv.applications, 'kyverno') :
-    'You need to add component `kyverno` to the cluster to be able to deploy cert-manager Certificate resources for the the openshift web console.';
+  local sa = kube.ServiceAccount('openshift4-console-sync-' + c) {
+    metadata+: {
+      namespace: params.namespace,
+    },
+  };
+  local sourceNsRole = kube.Role('openshift4-console-sync-' + c) {
+    metadata+: {
+      namespace: params.namespace,
+    },
+    rules: [
+      {
+        apiGroups: [ '' ],
+        resources: [ 'secrets' ],
+        verbs: [ 'get', 'list', 'watch' ],
+      },
+    ],
+  };
+  local targetNsRole = kube.Role('openshift4-console-sync-' + c) {
+    metadata+: {
+      namespace: 'openshift-config',
+    },
+    rules: [
+      {
+        apiGroups: [ '' ],
+        resources: [ 'secrets' ],
+        verbs: [ 'get', 'update', 'patch' ],
+      },
+    ],
+  };
+
   [
     cm.cert(c) {
       metadata+: {
         // Certificate must be deployed in the same namespace as the web
         // console, otherwise OpenShift won't admit the HTTP01 solver route.
-        // We copy the resulting secret to namespace 'openshift-config' with
-        // Kyverno, see below.
+        // We copy the resulting secret to namespace 'openshift-config', see below.
         namespace: params.namespace,
       },
       spec+: {
         secretName: '%s' % c,
       },
     } + com.makeMergeable(cert),
-    kyverno.ClusterPolicy('openshift4-console-sync-' + c) {
-      spec: {
-        rules: [
-          {
-            name: 'Sync "%s" certificate secret to openshift-config' % c,
-            match: {
-              resources: {
-                kinds: [ 'Namespace' ],
-                // We copy the created TLS secret into all namespaces which
-                // have the annotation specified in `kyvernoAnnotation`.
-                annotations: kyvernoAnnotation,
-              },
-            },
-            generate: {
-              kind: 'Secret',
-              name: c,
-              namespace: '{{request.object.metadata.name}}',
-              synchronize: true,
-              clone: {
-                namespace: params.namespace,
-                name: c,
-              },
+    kube.ConfigMap('openshift4-console-sync-' + c) {
+      metadata+: {
+        namespace: params.namespace,
+      },
+      data: {
+        'reconcile-console-secret.sh': (importstr 'scripts/reconcile-console-secret.sh'),
+      },
+    },
+    sa,
+    sourceNsRole,
+    targetNsRole,
+    kube.RoleBinding('openshift4-console-sync-' + c) {
+      metadata+: {
+        namespace: sourceNsRole.metadata.namespace,
+      },
+      subjects_: [ sa ],
+      roleRef_: sourceNsRole,
+    },
+    kube.RoleBinding('openshift4-console-sync-' + c) {
+      metadata+: {
+        namespace: targetNsRole.metadata.namespace,
+      },
+      subjects_: [ sa ],
+      roleRef_: targetNsRole,
+    },
+    kube.Deployment('openshift4-console-sync-' + c) {
+      metadata+: {
+        namespace: params.namespace,
+      },
+      spec+: {
+        strategy: {
+          type: 'Recreate',
+        },
+        replicas: 1,
+        selector: {
+          matchLabels: {
+            app: 'openshift4-console-sync-' + c,
+          },
+        },
+        template+: {
+          metadata: {
+            labels: {
+              app: 'openshift4-console-sync-' + c,
             },
           },
-        ],
+          spec+: {
+            serviceAccountName: 'openshift4-console-sync-' + c,
+            containers: [
+              {
+                name: 'sync',
+                image: '%(registry)s/%(repository)s:%(tag)s' % params.images.oc,
+                workingDir: '/export',
+                env: [
+                  {
+                    name: 'SECRET_NAME',
+                    value: c,
+                  },
+                  {
+                    name: 'HOME',
+                    value: '/export',
+                  },
+                ],
+                command: [
+                  '/scripts/reconcile-console-secret.sh',
+                ],
+                volumeMounts: [
+                  {
+                    name: 'export',
+                    mountPath: '/export',
+                  },
+                  {
+                    name: 'scripts',
+                    mountPath: '/scripts',
+                  },
+                ],
+              },
+            ],
+            volumes: [
+              {
+                name: 'scripts',
+                configMap: {
+                  name: 'openshift4-console-sync-' + c,
+                  defaultMode: 365,  // 365 = 0555
+                },
+              },
+              {
+                name: 'export',
+                emptyDir: {},
+              },
+            ],
+          },
+        },
       },
     },
   ];
@@ -104,5 +192,4 @@ local certs =
 {
   certs: certs,
   secrets: secrets,
-  kyvernoAnnotation: kyvernoAnnotation,
 }

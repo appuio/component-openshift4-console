@@ -14,27 +14,166 @@ spec:
     name: letsencrypt-staging
   secretName: console-cluster-example-org-tls
 ---
-apiVersion: kyverno.io/v1
-kind: ClusterPolicy
+apiVersion: v1
+data:
+  reconcile-console-secret.sh: |
+    #!/bin/bash
+    set -euo pipefail
+
+    test -n "${SECRET_NAME:-}" || (echo "SECRET_NAME is required" && exit 1)
+
+    source_namespace="openshift-console"
+    target_namespace="openshift-config"
+
+    # # Wait for the secret to be created before trying to get it.
+    # # TODO: --for=create is included with OCP 4.17
+    # kubectl -n "${source_namespace}" wait secret "${SECRET_NAME}" --for=create --timeout=30m
+    echo "Waiting for secret ${SECRET_NAME} to be created"
+    while test -z "$(kubectl -n "${source_namespace}" get secret "${SECRET_NAME}" --ignore-not-found -oname)" ; do
+       printf "."
+       sleep 1
+    done
+    printf "\n"
+
+    # When using -w flag kubectl returns the secret once on startup and then again when it changes.
+    kubectl -n "${source_namespace}" get secret "${SECRET_NAME}" -ojson -w | jq -c --unbuffered | while read -r secret ; do
+       echo "Syncing secret: $(printf "%s" "$secret" | jq -r '.metadata.name')"
+
+       kubectl -n "$target_namespace" apply --server-side -f <(printf "%s" "$secret" | jq '{"apiVersion": .apiVersion, "kind": .kind, "metadata": {"name": .metadata.name}, "type": .type, "data": .data}')
+    done
+kind: ConfigMap
 metadata:
   annotations: {}
   labels:
     name: openshift4-console-sync-console-cluster-example-org-tls
   name: openshift4-console-sync-console-cluster-example-org-tls
+  namespace: openshift-console
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations: {}
+  labels:
+    name: openshift4-console-sync-console-cluster-example-org-tls
+  name: openshift4-console-sync-console-cluster-example-org-tls
+  namespace: openshift-console
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations: {}
+  labels:
+    name: openshift4-console-sync-console-cluster-example-org-tls
+  name: openshift4-console-sync-console-cluster-example-org-tls
+  namespace: openshift-console
+rules:
+  - apiGroups:
+      - ''
+    resources:
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations: {}
+  labels:
+    name: openshift4-console-sync-console-cluster-example-org-tls
+  name: openshift4-console-sync-console-cluster-example-org-tls
+  namespace: openshift-config
+rules:
+  - apiGroups:
+      - ''
+    resources:
+      - secrets
+    verbs:
+      - get
+      - update
+      - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: openshift4-console-sync-console-cluster-example-org-tls
+  name: openshift4-console-sync-console-cluster-example-org-tls
+  namespace: openshift-console
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: openshift4-console-sync-console-cluster-example-org-tls
+subjects:
+  - kind: ServiceAccount
+    name: openshift4-console-sync-console-cluster-example-org-tls
+    namespace: openshift-console
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: openshift4-console-sync-console-cluster-example-org-tls
+  name: openshift4-console-sync-console-cluster-example-org-tls
+  namespace: openshift-config
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: openshift4-console-sync-console-cluster-example-org-tls
+subjects:
+  - kind: ServiceAccount
+    name: openshift4-console-sync-console-cluster-example-org-tls
+    namespace: openshift-console
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations: {}
+  labels:
+    name: openshift4-console-sync-console-cluster-example-org-tls
+  name: openshift4-console-sync-console-cluster-example-org-tls
+  namespace: openshift-console
 spec:
-  rules:
-    - generate:
-        clone:
-          name: console-cluster-example-org-tls
-          namespace: openshift-console
-        kind: Secret
-        name: console-cluster-example-org-tls
-        namespace: '{{request.object.metadata.name}}'
-        synchronize: true
-      match:
-        resources:
-          annotations:
-            syn.tools/openshift4-console: secret-target-namespace
-          kinds:
-            - Namespace
-      name: Sync "console-cluster-example-org-tls" certificate secret to openshift-config
+  minReadySeconds: 30
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: openshift4-console-sync-console-cluster-example-org-tls
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: openshift4-console-sync-console-cluster-example-org-tls
+    spec:
+      containers:
+        - command:
+            - /scripts/reconcile-console-secret.sh
+          env:
+            - name: SECRET_NAME
+              value: console-cluster-example-org-tls
+            - name: HOME
+              value: /export
+          image: quay.io/appuio/oc:v4.15
+          name: sync
+          volumeMounts:
+            - mountPath: /export
+              name: export
+            - mountPath: /scripts
+              name: scripts
+          workingDir: /export
+      imagePullSecrets: []
+      initContainers: []
+      serviceAccountName: openshift4-console-sync-console-cluster-example-org-tls
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - configMap:
+            defaultMode: 365
+            name: openshift4-console-sync-console-cluster-example-org-tls
+          name: scripts
+        - emptyDir: {}
+          name: export

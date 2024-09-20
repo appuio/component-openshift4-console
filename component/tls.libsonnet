@@ -107,10 +107,10 @@ local makeCert(c, cert) =
       metadata+: {
         namespace: params.namespace,
       },
-      strategy: {
-        type: 'Recreate',
-      },
       spec+: {
+        strategy: {
+          type: 'Recreate',
+        },
         replicas: 1,
         selector: {
           matchLabels: {

@@ -61,7 +61,7 @@ local makeCert(c, cert) =
       {
         apiGroups: [ '' ],
         resources: [ 'secrets' ],
-        verbs: [ 'get', 'update', 'patch' ],
+        verbs: [ 'get', 'create', 'update', 'patch' ],
       },
     ],
   };

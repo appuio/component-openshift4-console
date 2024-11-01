@@ -40,6 +40,7 @@ jobs:
           - custom-links
           - custom-logo
           - ocp-4.14
+          - notifications
     defaults:
       run:
         working-directory: ${{ env.COMPONENT_NAME }}
@@ -62,6 +63,7 @@ jobs:
           - custom-links
           - custom-logo
           - ocp-4.14
+          - notifications
     defaults:
       run:
         working-directory: ${{ env.COMPONENT_NAME }}

@@ -1,13 +1,13 @@
 {
   "template": "https://github.com/projectsyn/commodore-component-template.git",
-  "commit": "f12cbb49f928cf689cf39b98d8d7c9e88fb289f6",
+  "commit": "0aba6c3dc0f4bcbe81aab1cdcc977f32b00f1cb2",
   "checkout": "main",
   "context": {
     "cookiecutter": {
       "name": "OpenShift4 Console",
       "slug": "openshift4-console",
       "parameter_key": "openshift4_console",
-      "test_cases": "defaults custom-plugins custom-route custom-route-legacy custom-route-managed-tls custom-links custom-logo ocp-4.14",
+      "test_cases": "defaults custom-plugins custom-route custom-route-legacy custom-route-managed-tls custom-links custom-logo ocp-4.14 notifications",
       "add_lib": "n",
       "add_pp": "n",
       "add_golden": "y",

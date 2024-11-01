@@ -172,6 +172,8 @@ local consoleRoutePatch =
 
 local tls = import 'tls.libsonnet';
 
+local notifications = import 'notifications.libsonnet';
+
 {
   '00_namespace': kube.Namespace(params.namespace) {
     metadata+: {
@@ -205,4 +207,5 @@ local tls = import 'tls.libsonnet';
     faviconRoute,
   [if consoleRoutePatch != null then '20_ingress_config_patch']:
     consoleRoutePatch,
+  [if std.length(notifications.notifications) > 0 then '30_notifications']: notifications.notifications,
 }

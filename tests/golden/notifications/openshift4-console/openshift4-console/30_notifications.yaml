@@ -1,0 +1,42 @@
+apiVersion: console.openshift.io/v1
+kind: ConsoleNotification
+metadata:
+  annotations: {}
+  labels:
+    name: custom
+  name: custom
+spec:
+  backgroundColor: ' #d1d61c'
+  color: '#1abc9c'
+  link:
+    href: https://docs.appuio.cloud
+    text: APPUiO documentation
+  location: BannerBottom
+  text: Customized Notification
+---
+apiVersion: console.openshift.io/v1
+kind: ConsoleNotification
+metadata:
+  annotations: {}
+  labels:
+    name: standard
+  name: standard
+spec:
+  backgroundColor: '#2596be'
+  color: '#fff'
+  link: null
+  location: BannerTop
+  text: Standard Notification
+---
+apiVersion: v1
+data:
+  message: |-
+    Customized Notification
+    Standard Notification
+kind: ConfigMap
+metadata:
+  annotations: {}
+  labels:
+    name: motd
+  name: motd
+  namespace: openshift

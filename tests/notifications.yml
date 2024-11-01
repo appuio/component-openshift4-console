@@ -1,3 +1,14 @@
-# Overwrite parameters here
+parameters:
+  openshift4_console:
+    notifications:
+      standard:
+        text: Standard Notification
 
-# parameters: {...}
+      custom:
+        text: Customized Notification
+        location: BannerBottom
+        color: '#1abc9c'
+        backgroundColor: ' #d1d61c'
+        link:
+          href: https://docs.appuio.cloud
+          text: APPUiO documentation

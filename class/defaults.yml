@@ -26,3 +26,5 @@ parameters:
 
     console_links: {}
     custom_logo: {}
+
+    notifications: {}

@@ -41,6 +41,7 @@ jobs:
           - custom-logo
           - ocp-4.14
           - notifications
+          - upgrade-notification
     defaults:
       run:
         working-directory: ${{ env.COMPONENT_NAME }}
@@ -64,6 +65,7 @@ jobs:
           - custom-logo
           - ocp-4.14
           - notifications
+          - upgrade-notification
     defaults:
       run:
         working-directory: ${{ env.COMPONENT_NAME }}

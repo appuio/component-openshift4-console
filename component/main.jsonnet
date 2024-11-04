@@ -208,4 +208,5 @@ local notifications = import 'notifications.libsonnet';
   [if consoleRoutePatch != null then '20_ingress_config_patch']:
     consoleRoutePatch,
   [if std.length(notifications.notifications) > 0 then '30_notifications']: notifications.notifications,
+  [if std.length(notifications.upgrade_notification) > 0 then '31_upgrade_notification']: notifications.upgrade_notification,
 }

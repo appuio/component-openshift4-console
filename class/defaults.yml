@@ -28,3 +28,6 @@ parameters:
     custom_logo: {}
 
     notifications: {}
+    upgrade_notification:
+      enabled: false
+      notification: {}

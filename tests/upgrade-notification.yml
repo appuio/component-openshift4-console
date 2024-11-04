@@ -1,3 +1,20 @@
-# Overwrite parameters here
+parameters:
+  openshift4_console:
+    openshift_version:
+      Major: '4'
+      Minor: '15'
+    upgrade_notification:
+      enabled: true
+      notification:
+        text: 'Cluster will be upgraded to OpenShift $OCP_VERSION in the maintenance window at $NEXT_MAINTENANCE'
+        link:
+          href: https://kb.vshn.ch/oc4/references/release_notes.html
+          text: release notes
 
-# parameters: {...}
+  openshift_upgrade_controller:
+    namespace: appuio-openshift-upgrade-controller
+    cluster_version:
+      overlays:
+        "2025-01-01T12:00:00Z":
+          spec:
+            channel: stable-4.16

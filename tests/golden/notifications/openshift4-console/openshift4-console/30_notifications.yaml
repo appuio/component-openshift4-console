@@ -27,16 +27,3 @@ spec:
   link: null
   location: BannerTop
   text: Standard Notification
----
-apiVersion: v1
-data:
-  message: |-
-    Customized Notification
-    Standard Notification
-kind: ConfigMap
-metadata:
-  annotations: {}
-  labels:
-    name: motd
-  name: motd
-  namespace: openshift

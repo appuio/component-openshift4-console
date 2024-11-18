@@ -207,6 +207,8 @@ local notifications = import 'notifications.libsonnet';
     faviconRoute,
   [if consoleRoutePatch != null then '20_ingress_config_patch']:
     consoleRoutePatch,
+  [if std.length(notifications.rbac) > 0 then '30_notification_rbac']:
+    notifications.rbac,
   [if std.length(notifications.notifications) > 0 then '30_notifications']: notifications.notifications,
   [if std.length(notifications.upgrade_notification) > 0 then '31_upgrade_notification']: notifications.upgrade_notification,
 }

@@ -63,6 +63,17 @@ local notificationRBAC =
         resources: [ 'consolenotifications' ],
         verbs: [ '*' ],
       },
+      {
+        apiGroups: [ 'managedupgrade.appuio.io' ],
+        resources: [ 'upgradeconfigs' ],
+        verbs: [ 'get', 'list' ],
+      },
+      // needed so that `oc version` can get the OCP server version
+      {
+        apiGroups: [ 'config.openshift.io' ],
+        resources: [ 'clusterversions' ],
+        verbs: [ 'get', 'list' ],
+      },
     ],
   };
   local cluster_role_binding =

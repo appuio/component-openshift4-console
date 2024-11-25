@@ -6,8 +6,10 @@ data:
     "metadata":
       "annotations": {}
       "labels":
-        "name": "upgrade"
-      "name": "upgrade"
+        "appuio.io/notification": "true"
+        "appuio.io/ocp-version": "4.16"
+        "name": "upgrade-4.16"
+      "name": "upgrade-4.16"
     "spec":
       "backgroundColor": "#2596be"
       "color": "#fff"
@@ -35,9 +37,10 @@ data:
     echo "OVERLAY_VERSION: $OVERLAY_VERSION"
     echo "OVERLAY_VERSION_MINOR: $OVERLAY_VERSION_MINOR"
 
-    export NEXT_MAINTENANCE=$(kubectl -n appuio-openshift-upgrade-controller get upgradeconfigs -oyaml | yq '[.items[].status.nextPossibleSchedules[].time | from_yaml | select(. > env(OVERLAY_DATE))][0] | tz("Europe/Zurich") | format_datetime("02.01.2006 15:04")')
+    NEXT_MAINTENANCE=$(kubectl -n appuio-openshift-upgrade-controller get upgradeconfigs -oyaml | yq '[.items[].status.nextPossibleSchedules[].time | from_yaml | select(. > env(OVERLAY_DATE))][0] | tz("Europe/Zurich") | format_datetime("02.01.2006 15:04")')
     test -n "${NEXT_MAINTENANCE:-}" || (echo "No valid maintenance window found" && exit 1)
     echo "NEXT_MAINTENANCE: $NEXT_MAINTENANCE"
+    export NEXT_MAINTENANCE
 
     yq '(.. | select(tag == "!!str")) |= envsubst' template/upgrade.yaml > notification.yaml
     cat notification.yaml
@@ -62,6 +65,7 @@ kind: Job
 metadata:
   annotations:
     argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
   labels:
     name: create-upgrade-notification
   name: create-upgrade-notification
@@ -88,7 +92,7 @@ spec:
             - name: OVERLAY_VERSION_MINOR
               value: '16'
           image: quay.io/appuio/oc:v4.15
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: create-console-notification
           ports: []
           stdin: false
@@ -123,21 +127,12 @@ apiVersion: v1
 data:
   cleanup-upgrade-notification.sh: |
     #!/bin/bash
-    set -euo pipefail
+    set -exo pipefail
 
-    echo "OVERLAY_VERSION_MINOR: $OVERLAY_VERSION_MINOR"
-    # NOTE(sg): We use 4.0.0 as fallback current version since we only care that
-    # the current minor is less than the overlay minor for no-op upgrades.
-    export CURRENT_VERSION=${JOB_spec_desiredVersion_version:-"4.0.0"}
-    CURRENT_MINOR=$(echo "$CURRENT_VERSION" | cut -d. -f2)
-    echo "CURRENT_MINOR: $CURRENT_MINOR (0 is expected for no-op jobs)"
-
-    if (( OVERLAY_VERSION_MINOR > CURRENT_MINOR )); then
-        echo "Minor upgrade still pending. Nothing to clean up."
-    else
-        echo "Deleting upgrade console notification"
-        kubectl delete consolenotifications upgrade
-    fi
+    OCP_MINOR=$(echo $JOB_spec_desiredVersion_version | jq -r 'split(".") | .[0:2] | join(".")')
+    echo $OCP_MINOR
+    echo "Deleting upgrade console notification"
+    kubectl delete consolenotifications -l appuio.io/ocp-version="$OCP_MINOR"
 kind: ConfigMap
 metadata:
   annotations: {}
@@ -168,9 +163,7 @@ spec:
             - args: []
               command:
                 - /usr/local/bin/cleanup
-              env:
-                - name: OVERLAY_VERSION
-                  value: '16'
+              env: []
               image: quay.io/appuio/oc:v4.15
               imagePullPolicy: IfNotPresent
               name: cleanup
@@ -180,6 +173,8 @@ spec:
               volumeMounts:
                 - mountPath: /usr/local/bin/cleanup
                   name: scripts
+                  readOnly: true
+                  subPath: cleanup-upgrade-notification.sh
           restartPolicy: Never
           serviceAccountName: notification-manager
           volumes:

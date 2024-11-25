@@ -13,6 +13,11 @@ local namespace = {
 
 local makeConsoleNotification(name, args) =
   kube._Object('console.openshift.io/v1', 'ConsoleNotification', name) {
+    metadata+: {
+      labels+: {
+        'appuio.io/notification': 'true',
+      },
+    },
     spec: {
       text: args.text,
       location: std.get(args, 'location', 'BannerTop'),
@@ -30,22 +35,20 @@ local consoleNotifications = [
 
 local nextChannelOverlay() =
   local overlays = inv.parameters.openshift_upgrade_controller.cluster_version.overlays;
-  local channelOverlays = [
-    [ name, overlays[name].spec.channel ]
-    for name in std.objectFields(overlays)
-    if std.objectHas(overlays[name].spec, 'channel')
-  ];
-  local futureChannelOverlays = [
-    overlay
-    for
-    overlay in channelOverlays
-    if std.split(overlay[1], '.')[1] > params.openshift_version.Minor
-  ];
-  if std.length(futureChannelOverlays) > 0 then {
-    date: futureChannelOverlays[0][0],
-    channel: futureChannelOverlays[0][1],
-    version: std.split(futureChannelOverlays[0][1], '-')[1],
-  } else {};
+  local channelOverlays = {
+    [date]: overlays[date].spec.channel
+    for date in std.objectFields(overlays)
+    if std.objectHas(overlays[date].spec, 'channel')
+       && std.split(overlays[date].spec.channel, '.')[1] > params.openshift_version.Minor
+  };
+  local date = if std.length(channelOverlays) > 0 then
+    std.sort(std.objectFields(channelOverlays))[0];
+  if date != null then
+    {
+      date: date,
+      channel: channelOverlays[date],
+      version: std.split(channelOverlays[date], '-')[1],
+    };
 
 local upgradeControllerNS = {
   metadata+: {
@@ -74,6 +77,12 @@ local notificationRBAC =
         resources: [ 'clusterversions' ],
         verbs: [ 'get', 'list' ],
       },
+      {
+        apiGroups: [ '' ],
+        resources: [ 'configmaps' ],
+        resourceNames: [ 'upgrade-notification-template' ],
+        verbs: [ '*' ],
+      },
     ],
   };
   local cluster_role_binding =
@@ -93,7 +102,16 @@ local createUpgradeNotification(overlay) =
     kube.ConfigMap('upgrade-notification-template') + namespace {
       data: {
         'upgrade.yaml': std.manifestYamlDoc(
-          makeConsoleNotification('upgrade', params.upgrade_notification.notification)
+          std.mergePatch(
+            makeConsoleNotification('upgrade-%s' % overlay.version, params.upgrade_notification.notification),
+            {
+              metadata: {
+                labels: {
+                  'appuio.io/ocp-version': overlay.version,
+                },
+              },
+            },
+          ),
         ),
       },
     },
@@ -111,6 +129,7 @@ local createUpgradeNotification(overlay) =
       metadata+: {
         annotations+: {
           'argocd.argoproj.io/hook': 'PostSync',
+          'argocd.argoproj.io/hook-delete-policy': 'BeforeHookCreation',
         },
       },
       spec+: {
@@ -119,7 +138,6 @@ local createUpgradeNotification(overlay) =
             containers_+: {
               notification: kube.Container('notification') {
                 image: '%(registry)s/%(repository)s:%(tag)s' % params.images.oc,
-                imagePullPolicy: 'Always',  // needed for now to get tzdata, can be removed later
                 name: 'create-console-notification',
                 workingDir: '/export',
                 command: [ '/scripts/create-console-notification.sh' ],
@@ -174,7 +192,7 @@ local hookScript = kube.ConfigMap('cleanup-upgrade-notification') + upgradeContr
   },
 };
 
-local ujh(overlayVersion) = kube._Object('managedupgrade.appuio.io/v1beta1', 'UpgradeJobHook', 'cleanup-upgrade-notification') + upgradeControllerNS {
+local ujh = kube._Object('managedupgrade.appuio.io/v1beta1', 'UpgradeJobHook', 'cleanup-upgrade-notification') + upgradeControllerNS {
   spec+: {
     selector: {
       matchLabels: {
@@ -193,12 +211,11 @@ local ujh(overlayVersion) = kube._Object('managedupgrade.appuio.io/v1beta1', 'Up
               kube.Container('cleanup') {
                 image: '%(registry)s/%(repository)s:%(tag)s' % params.images.oc,
                 command: [ '/usr/local/bin/cleanup' ],
-                env_+: {
-                  OVERLAY_VERSION: std.split(overlayVersion, '.')[1],
-                },
                 volumeMounts_+: {
                   scripts: {
                     mountPath: '/usr/local/bin/cleanup',
+                    readOnly: true,
+                    subPath: 'cleanup-upgrade-notification.sh',
                   },
                 },
               },
@@ -223,9 +240,12 @@ local ujh(overlayVersion) = kube._Object('managedupgrade.appuio.io/v1beta1', 'Up
 
 local upgradeNotification = if params.upgrade_notification.enabled then
   local channelOverlay = nextChannelOverlay();
-  createUpgradeNotification(channelOverlay) + [
+  local notification = if channelOverlay != null then
+    createUpgradeNotification(channelOverlay)
+  else [];
+  notification + [
     hookScript,
-    ujh(std.get(channelOverlay, 'version', '4.10000')),
+    ujh,
   ] else [];
 
 {

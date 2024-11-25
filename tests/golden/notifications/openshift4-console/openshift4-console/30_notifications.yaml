@@ -3,6 +3,7 @@ kind: ConsoleNotification
 metadata:
   annotations: {}
   labels:
+    appuio.io/notification: 'true'
     name: custom
   name: custom
 spec:
@@ -19,6 +20,7 @@ kind: ConsoleNotification
 metadata:
   annotations: {}
   labels:
+    appuio.io/notification: 'true'
     name: standard
   name: standard
 spec:

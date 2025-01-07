@@ -1,5 +1,8 @@
 parameters:
   openshift4_console:
+    =_metadata:
+      multi_tenant: true
+
     images:
       oc:
         registry: quay.io

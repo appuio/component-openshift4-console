@@ -6,7 +6,7 @@ local argocd = import 'lib/argocd.libjsonnet';
 local app = argocd.App('openshift4-console', params.namespace, secrets=false);
 
 local appPath =
-  local project = std.get(app, 'spec', { project: 'syn' }).project;
+  local project = std.get(std.get(app, 'spec', {}), 'project', 'syn');
   if project == 'syn' then 'apps' else 'apps-%s' % project;
 
 {

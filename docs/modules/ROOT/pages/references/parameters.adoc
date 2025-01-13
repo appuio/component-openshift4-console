@@ -171,6 +171,22 @@ This behavior is caused by a security feature in the OpenShift ingress controlle
 
 However, since OpenShift requires that custom TLS secrets for the OpenShift console are stored in namespace `openshift-config`, we deploy a script to clone the TLS secret created by cert-manager into namespace `openshift-config` for each `Certificate` resource.
 
+== `notifications`
+
+[horizontal]
+type:: dictionary
+default:: `{}`
+
+Each entry in parameter `notifications` is deployed onto the cluster as a `ConsoleNotification` resource.
+Entries with `null` values are skipped.
+This allows users to remove notifications which were configured higher up in the hierarchy.
+
+The dictionary keys are used as `metadata.name` for the resulting `ConsoleNotification` resources.
+
+The dictionary values correspond to the `.spec` of the `ConsoleNotification`.
+See the https://docs.openshift.com/container-platform/latest/rest_api/console_apis/consolenotification-console-openshift-io-v1.html[OpenShift docs] for available parameters.
+
+This component will by default use `.location: BannerTop`, `.color: '#1abc9c'` and `.backgroundColor: ' #d1d61c'` unless otherwise configured.
 
 == Example: Custom hostname in cluster's app domain
 
@@ -262,3 +278,20 @@ openshift4_console:
 <2> Adds a link to the help menu at the top of every page
 <3> Adds a link to the dashboard of every namespace with a label `organization`
 <4> Provide a single base64-encoded logo and the key needs to have the correct filename extension
+
+
+=== Example: Console notification
+
+[source,yaml]
+----
+openshift4_console:
+  notifications:
+    appuio-documentation:
+      text: Please visit our documentation for more information
+      location: BannerBottom
+      color: '#1abc9c'
+      backgroundColor: ' #d1d61c'
+      link:
+        href: https://docs.appuio.cloud
+        text: APPUiO documentation
+----

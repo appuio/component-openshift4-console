@@ -18,13 +18,15 @@ local makeConsoleNotification(name, args) =
         'appuio.io/notification': 'true',
       },
     },
-    spec: {
-      text: args.text,
-      location: std.get(args, 'location', 'BannerTop'),
-      color: std.get(args, 'color', '#fff'),
-      backgroundColor: std.get(args, 'backgroundColor', '#2596be'),
-      link: std.get(args, 'link'),
-    },
+    spec: std.prune(
+      {
+        text: args.text,
+        location: std.get(args, 'location', 'BannerTop'),
+        color: std.get(args, 'color', '#fff'),
+        backgroundColor: std.get(args, 'backgroundColor', '#2596be'),
+        link: std.get(args, 'link'),
+      },
+    ),
   };
 
 local consoleNotifications = [

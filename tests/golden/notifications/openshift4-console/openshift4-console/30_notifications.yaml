@@ -26,6 +26,5 @@ metadata:
 spec:
   backgroundColor: '#2596be'
   color: '#fff'
-  link: null
   location: BannerTop
   text: Standard Notification

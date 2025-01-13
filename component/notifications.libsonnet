@@ -102,16 +102,13 @@ local createUpgradeNotification(overlay) =
     kube.ConfigMap('upgrade-notification-template') + namespace {
       data: {
         'upgrade.yaml': std.manifestYamlDoc(
-          std.mergePatch(
-            makeConsoleNotification('upgrade-%s' % overlay.version, params.upgrade_notification.notification),
-            {
-              metadata: {
-                labels: {
-                  'appuio.io/ocp-version': overlay.version,
-                },
+          makeConsoleNotification('upgrade-%s' % overlay.version, params.upgrade_notification.notification) {
+            metadata+: {
+              labels+: {
+                'appuio.io/ocp-version': overlay.version,
               },
             },
-          ),
+          },
         ),
       },
     },

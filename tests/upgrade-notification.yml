@@ -6,7 +6,7 @@ parameters:
     upgrade_notification:
       enabled: true
       notification:
-        text: 'Cluster will be upgraded to OpenShift $OCP_VERSION in the maintenance window at $NEXT_MAINTENANCE'
+        text: 'Cluster will be upgraded to OpenShift $OVERLAY_VERSION in the maintenance window at $NEXT_MAINTENANCE'
         link:
           href: https://kb.vshn.ch/oc4/references/release_notes.html
           text: release notes

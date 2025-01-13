@@ -188,6 +188,25 @@ See the https://docs.openshift.com/container-platform/latest/rest_api/console_ap
 
 This component will by default use `.location: BannerTop`, `.color: '#1abc9c'` and `.backgroundColor: ' #d1d61c'` unless otherwise configured.
 
+
+== `upgrade_notification`
+
+[horizontal]
+type:: dictionary
+default::
++
+[source,yaml]
+----
+enabled: false
+notification: {}
+----
+
+When upgrade notifications are enabled, this component will create an ArgoCD sync hook and an upgradejob hook which will dynamically create (and remove) a `ConsoleNotification` informing users about the next upcoming minor OCP upgrade.
+It is based on the upgrade controller's channel overlay and the next possible maintenance dates.
+
+The values for the `upgrade_notification.notification` dictionary are the the same as for `notifications` above.
+Additionally the following variables can be used in the notification text: `OVERLAY_DATE`, `OVERLAY_CHANNEL`, `OVERLAY_VERSION`, `OVERLAY_VERSION_MINOR` and `NEXT_MAINTENANCE`, see also the example below.
+
 == Example: Custom hostname in cluster's app domain
 
 [source,yaml]
@@ -294,4 +313,18 @@ openshift4_console:
       link:
         href: https://docs.appuio.cloud
         text: APPUiO documentation
+----
+
+=== Example: Upgrade notification
+
+[source,yaml]
+----
+openshift4_console:
+  upgrade_notification:
+    enabled: true
+    notification:
+      text: 'Cluster will be upgraded to OpenShift $OVERLAY_VERSION in the maintenance window at $NEXT_MAINTENANCE'
+      link:
+        href: https://kb.vshn.ch/oc4/references/release_notes.html
+        text: release notes
 ----

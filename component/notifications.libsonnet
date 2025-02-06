@@ -137,6 +137,7 @@ local createUpgradeNotification(overlay) =
             containers_+: {
               notification: kube.Container('notification') {
                 image: '%(registry)s/%(repository)s:%(tag)s' % params.images.oc,
+                imagePullPolicy: 'Always',
                 name: 'create-console-notification',
                 workingDir: '/export',
                 command: [ '/scripts/create-console-notification.sh' ],

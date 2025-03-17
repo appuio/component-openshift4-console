@@ -57,4 +57,4 @@ KUBENT_IMAGE    ?= ghcr.io/doitintl/kube-no-trouble:latest
 KUBENT_DOCKER   ?= $(DOCKER_CMD) $(DOCKER_ARGS) $(root_volume) --entrypoint=/app/kubent $(KUBENT_IMAGE)
 
 instance ?= defaults
-test_instances = tests/defaults.yml tests/custom-plugins.yml tests/custom-route.yml tests/custom-route-legacy.yml tests/custom-route-managed-tls.yml tests/custom-links.yml tests/custom-logo.yml tests/ocp-4.14.yml tests/notifications.yml tests/upgrade-notification.yml
+test_instances = tests/defaults.yml tests/custom-plugins.yml tests/custom-route.yml tests/custom-route-legacy.yml tests/custom-route-managed-tls.yml tests/custom-links.yml tests/custom-logo.yml tests/notifications.yml tests/upgrade-notification.yml

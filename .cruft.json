@@ -7,7 +7,7 @@
       "name": "OpenShift4 Console",
       "slug": "openshift4-console",
       "parameter_key": "openshift4_console",
-      "test_cases": "defaults custom-plugins custom-route custom-route-legacy custom-route-managed-tls custom-links custom-logo ocp-4.14 notifications upgrade-notification",
+      "test_cases": "defaults custom-plugins custom-route custom-route-legacy custom-route-managed-tls custom-links custom-logo notifications upgrade-notification",
       "add_lib": "n",
       "add_pp": "n",
       "add_golden": "y",
@@ -24,7 +24,8 @@
       "github_owner": "appuio",
       "github_name": "component-openshift4-console",
       "github_url": "https://github.com/appuio/component-openshift4-console",
-      "_template": "https://github.com/projectsyn/commodore-component-template.git"
+      "_template": "https://github.com/projectsyn/commodore-component-template.git",
+      "_commit": "98d16f99766e6c6d97322dbe42e058f0e2bf73d0"
     }
   },
   "directory": null

@@ -81,6 +81,7 @@ Add plugins to the console.
 
 The component will inject a dynamic set of plugins into the configuration based on the reported OpenShift version in parameter `openshift_version`.
 For OpenShift 4.14 and newer, the component always adds plugin `monitoring-plugin`.
+For OpenShift 4.17 and newer, the component always adds plugin `networking-console-plugin`.
 Additionally, the component will remove duplicated entries from the list of configured plugins.
 
 NOTE: The order of entries in the field isn't guaranteed to be stable.

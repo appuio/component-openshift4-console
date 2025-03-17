@@ -9,3 +9,4 @@ spec:
   managementState: Managed
   plugins:
     - monitoring-plugin
+    - networking-console-plugin

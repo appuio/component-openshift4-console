@@ -35,7 +35,7 @@ default::
 [source,yaml]
 ----
 Major: '4'
-Minor: '13'
+Minor: '17'
 ----
 
 The OpenShift major and minor version.

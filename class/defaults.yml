@@ -14,7 +14,7 @@ parameters:
       openshift.io/node-selector: ''
     openshift_version:
       Major: '4'
-      Minor: '13'
+      Minor: '17'
     route:
       console: {}
       downloads: {}

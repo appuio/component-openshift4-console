@@ -7,4 +7,6 @@ metadata:
   name: cluster
 spec:
   managementState: Managed
-  plugins: []
+  plugins:
+    - monitoring-plugin
+    - networking-console-plugin

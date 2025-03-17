@@ -47,11 +47,12 @@ local tlsSecret =
 local consolePlugins =
   // set default plugins dynamically based on OCP minor version and append
   // user-configured plugins to the default.
-  local defaults =
-    if std.parseInt(params.openshift_version.Minor) > 13 then
-      [ 'monitoring-plugin' ]
+  local defaults = [ 'monitoring-plugin' ] + (
+    if std.parseInt(params.openshift_version.Minor) > 16 then
+      [ 'networking-console-plugin' ]
     else
-      [];
+      []
+  );
   // render final plugins list by appending any user-provided plugins that
   // aren't part of the default plugins to the list of plugins. We use
   // `std.set()` on the user-provided plugins so that users don't have to

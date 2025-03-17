@@ -39,7 +39,6 @@ jobs:
           - custom-route-managed-tls
           - custom-links
           - custom-logo
-          - ocp-4.14
           - notifications
           - upgrade-notification
     defaults:
@@ -63,7 +62,6 @@ jobs:
           - custom-route-managed-tls
           - custom-links
           - custom-logo
-          - ocp-4.14
           - notifications
           - upgrade-notification
     defaults:

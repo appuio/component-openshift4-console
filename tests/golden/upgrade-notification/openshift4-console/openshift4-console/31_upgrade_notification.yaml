@@ -144,7 +144,8 @@ metadata:
 apiVersion: managedupgrade.appuio.io/v1beta1
 kind: UpgradeJobHook
 metadata:
-  annotations: {}
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
   labels:
     name: cleanup-upgrade-notification
   name: cleanup-upgrade-notification

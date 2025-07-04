@@ -193,6 +193,11 @@ local hookScript = kube.ConfigMap('cleanup-upgrade-notification') + upgradeContr
 };
 
 local ujh = kube._Object('managedupgrade.appuio.io/v1beta1', 'UpgradeJobHook', 'cleanup-upgrade-notification') + upgradeControllerNS {
+  metadata+: {
+    annotations+: {
+      'argocd.argoproj.io/sync-options': 'SkipDryRunOnMissingResource=true',
+    },
+  },
   spec+: {
     selector: {
       matchLabels: {

@@ -1,6 +1,6 @@
 {
   "template": "https://github.com/projectsyn/commodore-component-template.git",
-  "commit": "98d16f99766e6c6d97322dbe42e058f0e2bf73d0",
+  "commit": "de1ad5aa829f6a478ba4d245c080056f9305e17e",
   "checkout": "main",
   "context": {
     "cookiecutter": {
@@ -25,7 +25,7 @@
       "github_name": "component-openshift4-console",
       "github_url": "https://github.com/appuio/component-openshift4-console",
       "_template": "https://github.com/projectsyn/commodore-component-template.git",
-      "_commit": "98d16f99766e6c6d97322dbe42e058f0e2bf73d0"
+      "_commit": "de1ad5aa829f6a478ba4d245c080056f9305e17e"
     }
   },
   "directory": null

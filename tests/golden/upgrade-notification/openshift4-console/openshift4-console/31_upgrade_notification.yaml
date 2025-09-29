@@ -91,7 +91,7 @@ spec:
               value: '4.16'
             - name: OVERLAY_VERSION_MINOR
               value: '16'
-          image: quay.io/appuio/oc:v4.15
+          image: quay.io/appuio/oc:v4.19
           imagePullPolicy: Always
           name: create-console-notification
           ports: []
@@ -165,7 +165,7 @@ spec:
               command:
                 - /usr/local/bin/cleanup
               env: []
-              image: quay.io/appuio/oc:v4.15
+              image: quay.io/appuio/oc:v4.19
               imagePullPolicy: IfNotPresent
               name: cleanup
               ports: []

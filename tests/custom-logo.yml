@@ -27,6 +27,9 @@ parameters:
         type: svg
         data: |-
           <SVG HERE>
+    custom_favicon:
+      type: png
+      data: <PNG|base64 HERE>
     custom_logo:
       logo.png: |-
         V2FpdCB0aGlzIGlzbid0IGEgcGljdHVyZS4uCgpMb3JlbSBpcHN1bSBkb2xvciBzaXQgYW1ldC4g

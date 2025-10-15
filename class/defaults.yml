@@ -29,6 +29,7 @@ parameters:
       '*': {}
       light: {}
       dark: {}
+    custom_favicon: {}
 
     notifications: {}
     upgrade_notification:

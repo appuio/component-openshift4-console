@@ -7,10 +7,10 @@ local params = inv.parameters.openshift4_console;
 
 local versionGroup = 'operator.openshift.io/v1';
 
-local validateLogo(obj) =
+local validateConfig(obj, kind='logo') =
   assert
     std.set(std.objectFields(obj)) == std.set([ 'type', 'data' ]) :
-    'Expected custom logo config to have keys `type` and `data`';
+    'Expected custom %s config to have keys `type` and `data`' % [ kind ];
   obj;
 
 local customLogos =
@@ -21,17 +21,17 @@ local customLogos =
          [ unsupportedKeys ];
   local config = {
     default: if std.length(params.custom_logos['*']) > 0 then
-      validateLogo(params.custom_logos['*']) {
+      validateConfig(params.custom_logos['*']) {
         key: 'default.%s' % super.type,
       }
     else {},
     Dark: if std.length(params.custom_logos.dark) > 0 then
-      validateLogo(params.custom_logos.dark) {
+      validateConfig(params.custom_logos.dark) {
         key: 'dark.%s' % super.type,
       }
     else {},
     Light: if std.length(params.custom_logos.light) > 0 then
-      validateLogo(params.custom_logos.light) {
+      validateConfig(params.custom_logos.light) {
         key: 'light.%s' % super.type,
       }
     else {},
@@ -68,6 +68,15 @@ local customLogos =
   else
     {};
 
+local favicon =
+  if std.length(params.custom_favicon) > 0 then
+    local config = validateConfig(params.custom_favicon, kind='favicon');
+    config {
+      key: 'favicon.%s' % super.type,
+    }
+  else
+    {};
+
 local legacyLogoFileName =
   local legacy_logo = std.get(params, 'custom_logo', {});
   if std.length(std.objectFields(legacy_logo)) > 0 then
@@ -78,7 +87,8 @@ local legacyLogoFileName =
     assert std.length(nameParts) > 1 :
            'The key of custom_logo must provide a filename with a valid filename extension';
     std.trace(
-      'Parameter `custom_logo` is deprecated for OpenShift 4.19 and newer. Use parameter `custom_logos` instead.',
+      'Parameter `custom_logo` is deprecated for OpenShift 4.19 and newer. '
+      + 'Use parameters `custom_logos` and `custom_favicon` instead.',
       name
     )
   else
@@ -155,8 +165,34 @@ local consoleSpec =
     if std.length(customLogos) > 0 then
       {
         customization+: {
-          logos: [
+          logos+: [
             customLogos.config,
+          ],
+        },
+      }
+    else
+      {}
+  ) + (
+    if std.length(favicon) > 0 then
+      {
+        customization+: {
+          logos+: [
+            {
+              type: 'Favicon',
+              themes: [
+                {
+                  mode: mode,
+                  source: {
+                    from: 'ConfigMap',
+                    configMap: {
+                      name: 'console-favicon',
+                      key: favicon.key,
+                    },
+                  },
+                }
+                for mode in [ 'Dark', 'Light' ]
+              ],
+            },
           ],
         },
       }
@@ -291,6 +327,22 @@ local notifications = import 'notifications.libsonnet';
       },
       binaryData: customLogos.cm_bindata,
       data: customLogos.cm_data,
+    },
+  [if std.length(favicon) > 0 then '01_favicon']:
+    kube.ConfigMap('console-favicon') {
+      metadata+: {
+        // ConfigMap must be deployed in namespace openshift-config
+        namespace: 'openshift-config',
+        // ConfigMap will be copied to namespace openshift-console
+        // To prevent ArgoCD from removing or complaining about the copy we add these annotations
+        annotations+: {
+          'argocd.argoproj.io/sync-options': 'Prune=false',
+          'argocd.argoproj.io/compare-options': 'IgnoreExtraneous',
+        },
+      },
+      [if favicon.type == 'svg' then 'data' else 'binaryData']: {
+        [favicon.key]: favicon.data,
+      },
     },
   '10_console': kube._Object(versionGroup, 'Console', 'cluster') {
     spec+: consoleSpec,

@@ -26,6 +26,20 @@ spec:
                 name: console-logos
               from: ConfigMap
         type: Masthead
+      - themes:
+          - mode: Dark
+            source:
+              configMap:
+                key: favicon.png
+                name: console-favicon
+              from: ConfigMap
+          - mode: Light
+            source:
+              configMap:
+                key: favicon.png
+                name: console-favicon
+              from: ConfigMap
+        type: Favicon
   managementState: Managed
   plugins:
     - monitoring-plugin

@@ -7,15 +7,80 @@ local params = inv.parameters.openshift4_console;
 
 local versionGroup = 'operator.openshift.io/v1';
 
-local logoFileName =
-  if std.length(std.objectFields(params.custom_logo)) > 0 then
-    assert std.length(std.objectFields(params.custom_logo)) == 1 :
+local validateLogo(obj) =
+  assert
+    std.set(std.objectFields(obj)) == std.set([ 'type', 'data' ]) :
+    'Expected custom logo config to have keys `type` and `data`';
+  obj;
+
+local customLogos =
+  local keys = std.set(std.objectFields(params.custom_logos));
+  local unsupportedKeys = std.setDiff(keys, std.set([ 'light', 'dark', '*' ]));
+  assert std.length(unsupportedKeys) == 0 :
+         'Parameter `custom_logos` contains unsupported keys: %s' %
+         [ unsupportedKeys ];
+  local config = {
+    default: if std.length(params.custom_logos['*']) > 0 then
+      validateLogo(params.custom_logos['*']) {
+        key: 'default.%s' % super.type,
+      }
+    else {},
+    Dark: if std.length(params.custom_logos.dark) > 0 then
+      validateLogo(params.custom_logos.dark) {
+        key: 'dark.%s' % super.type,
+      }
+    else {},
+    Light: if std.length(params.custom_logos.light) > 0 then
+      validateLogo(params.custom_logos.light) {
+        key: 'light.%s' % super.type,
+      }
+    else {},
+  };
+  if std.length(std.prune(config)) > 0 then
+    {
+      cm_data: {
+        [if std.length(config[theme]) > 0 && config[theme].type == 'svg' then config[theme].key]:
+          config[theme].data
+        for theme in [ 'default', 'Light', 'Dark' ]
+      },
+      cm_bindata: {
+        [if std.length(config[theme]) > 0 && config[theme].type != 'svg' then config[theme].key]:
+          config[theme].data
+        for theme in [ 'default', 'Light', 'Dark' ]
+      },
+      config: {
+        type: 'Masthead',
+        themes: [
+          {
+            mode: theme,
+            source: {
+              from: 'ConfigMap',
+              configMap: {
+                name: 'console-logos',
+                key: (if std.length(config[theme]) > 0 then config[theme] else config.default).key,
+              },
+            },
+          }
+          for theme in [ 'Light', 'Dark' ]
+        ],
+      },
+    }
+  else
+    {};
+
+local legacyLogoFileName =
+  local legacy_logo = std.get(params, 'custom_logo', {});
+  if std.length(std.objectFields(legacy_logo)) > 0 then
+    assert std.length(std.objectFields(legacy_logo)) == 1 :
            'The parameter custom_logo can only contain a single logo';
-    local name = std.objectFields(params.custom_logo)[0];
+    local name = std.objectFields(legacy_logo)[0];
     local nameParts = std.split(name, '.');
     assert std.length(nameParts) > 1 :
            'The key of custom_logo must provide a filename with a valid filename extension';
-    name
+    std.trace(
+      'Parameter `custom_logo` is deprecated for OpenShift 4.19 and newer. Use parameter `custom_logos` instead.',
+      name
+    )
   else
     '';
 
@@ -75,13 +140,24 @@ local consoleSpec =
     plugins: consolePlugins,
   } +
   (
-    if logoFileName != '' then
+    if legacyLogoFileName != '' then
       {
         customization+: {
           customLogoFile: {
-            key: logoFileName,
+            key: legacyLogoFileName,
             name: 'console-logo',
           },
+        },
+      }
+    else
+      {}
+  ) + (
+    if std.length(customLogos) > 0 then
+      {
+        customization+: {
+          logos: [
+            customLogos.config,
+          ],
         },
       }
     else
@@ -89,7 +165,7 @@ local consoleSpec =
   );
 
 local faviconRoute =
-  if logoFileName != '' && hostname != null then
+  if legacyLogoFileName != '' && hostname != null then
     kube._Object('route.openshift.io/v1', 'Route', 'console-favicon') {
       metadata+: {
         namespace: 'openshift-console',
@@ -187,7 +263,7 @@ local notifications = import 'notifications.libsonnet';
   },
   [if std.length(tls.secrets) > 0 then '01_tls_secrets']: tls.secrets,
   [if std.length(tls.certs) > 0 then '01_certs']: tls.certs,
-  [if logoFileName != '' then '01_logo']:
+  [if legacyLogoFileName != '' then '01_logo']:
     kube.ConfigMap('console-logo') {
       metadata+: {
         // ConfigMap must be deployed in namespace openshift-config
@@ -200,6 +276,21 @@ local notifications = import 'notifications.libsonnet';
         },
       },
       data: params.custom_logo,
+    },
+  [if std.length(customLogos) > 0 then '01_logos']:
+    kube.ConfigMap('console-logos') {
+      metadata+: {
+        // ConfigMap must be deployed in namespace openshift-config
+        namespace: 'openshift-config',
+        // ConfigMap will be copied to namespace openshift-console
+        // To prevent ArgoCD from removing or complaining about the copy we add these annotations
+        annotations+: {
+          'argocd.argoproj.io/sync-options': 'Prune=false',
+          'argocd.argoproj.io/compare-options': 'IgnoreExtraneous',
+        },
+      },
+      binaryData: customLogos.cm_bindata,
+      data: customLogos.cm_data,
     },
   '10_console': kube._Object(versionGroup, 'Console', 'cluster') {
     spec+: consoleSpec,

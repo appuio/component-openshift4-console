@@ -11,6 +11,21 @@ spec:
       key: logo.png
       name: console-logo
     customProductName: Company Cloud
+    logos:
+      - themes:
+          - mode: Light
+            source:
+              configMap:
+                key: light.svg
+                name: console-logos
+              from: ConfigMap
+          - mode: Dark
+            source:
+              configMap:
+                key: default.svg
+                name: console-logos
+              from: ConfigMap
+        type: Masthead
   managementState: Managed
   plugins:
     - monitoring-plugin

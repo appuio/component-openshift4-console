@@ -18,6 +18,15 @@ parameters:
           name: console-company-cloud-tls
       customization:
         customProductName: Company Cloud
+    custom_logos:
+      '*':
+        type: svg
+        data: |-
+          <SVG HERE>
+      light:
+        type: svg
+        data: |-
+          <SVG HERE>
     custom_logo:
       logo.png: |-
         V2FpdCB0aGlzIGlzbid0IGEgcGljdHVyZS4uCgpMb3JlbSBpcHN1bSBkb2xvciBzaXQgYW1ldC4g

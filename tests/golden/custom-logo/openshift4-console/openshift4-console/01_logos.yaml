@@ -1,0 +1,14 @@
+apiVersion: v1
+binaryData: {}
+data:
+  default.svg: <SVG HERE>
+  light.svg: <SVG HERE>
+kind: ConfigMap
+metadata:
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    argocd.argoproj.io/sync-options: Prune=false
+  labels:
+    name: console-logos
+  name: console-logos
+  namespace: openshift-config

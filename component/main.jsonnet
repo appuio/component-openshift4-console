@@ -7,6 +7,8 @@ local params = inv.parameters.openshift4_console;
 
 local versionGroup = 'operator.openshift.io/v1';
 
+local openshiftMinor = std.parseInt(params.openshift_version.Minor);
+
 local validateConfig(obj, kind='logo') =
   assert
     std.set(std.objectFields(obj)) == std.set([ 'type', 'data' ]) :
@@ -36,7 +38,7 @@ local customLogos =
       }
     else {},
   };
-  if std.length(std.prune(config)) > 0 then
+  if openshiftMinor > 18 && std.length(std.prune(config)) > 0 then
     {
       cm_data: {
         [if std.length(config[theme]) > 0 && config[theme].type == 'svg' then config[theme].key]:
@@ -69,7 +71,7 @@ local customLogos =
     {};
 
 local favicon =
-  if std.length(params.custom_favicon) > 0 then
+  if openshiftMinor > 18 && std.length(params.custom_favicon) > 0 then
     local config = validateConfig(params.custom_favicon, kind='favicon');
     config {
       key: 'favicon.%s' % super.type,
@@ -123,7 +125,7 @@ local consolePlugins =
   // set default plugins dynamically based on OCP minor version and append
   // user-configured plugins to the default.
   local defaults = [ 'monitoring-plugin' ] + (
-    if std.parseInt(params.openshift_version.Minor) > 16 then
+    if openshiftMinor > 16 then
       [ 'networking-console-plugin' ]
     else
       []

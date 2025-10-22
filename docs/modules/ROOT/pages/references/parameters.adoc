@@ -121,6 +121,12 @@ This allows users to remove links which were configured higher up in the hierarc
 type:: dictionary
 default:: `{}`
 
+[NOTE]
+====
+This parameter is deprecated on OpenShift 4.19 and newer.
+Use `custom_logos` and `custom_favicon` instead.
+====
+
 Add a custom logo to the console.
 Takes a single key with the filename and the value is the base64 encoded logo.
 The logo can be a file in any common image format, including GIF, JPG, PNG, or SVG, and is constrained to a max-height of 60px
@@ -131,12 +137,109 @@ The filename needs to have a filename extension which matches the image format.
 For SVG logos the file must *not* be base64 encoded, but inserted directly as a string.
 ====
 
-By default, OCP won't serve a favicon if a custom logo is configured for the console.
+By default, OpenShift won't serve a favicon if a custom logo is configured for the console.
 This is an intentional design decision as documented in this https://bugzilla.redhat.com/show_bug.cgi?id=1844883#c1[bug report].
 
 The component tries to ensure that a favicon is served even if a custom logo is configured.
 However, because the current workaround for the missing favicon requires an additional custom route for the console hostname, it can only be implemented for configurations which use a custom console hostname.
 Otherwise, the component is unable to correctly configure `spec.hostname` for the console.
+
+== `custom_logos`
+
+[horizontal]
+type:: dictionary
+default:: https://github.com/appuio/component-openshift4-console/blob/master/class/defaults.yml[See `class/defaults.yml`]
+
+Configure custom logos for the console.
+This parameter only has an effect on OpenShift 4.19 and newer.
+For older versions of OpenShift, use parameter `custom_logo`.
+
+OpenShift 4.19 introduces a new console look with a dark and light theme.
+The new custom logo mechanism allows configuring separate logos for each theme.
+The component supports keys `dark` and `light` to specify logos for the dark and light theme respectively.
+The component additionally supports specifying a single logo for all themes in key `'*'`.
+If there's no logo for a theme, the console will show the default logo for that theme.
+
+Each logo can be a file in any common image format, including GIF, JPG, PNG, or SVG, and is constrained to a max-height of 60px.
+
+The component looks for fields `type` and `data` in each entry of the parameter.
+Field `type` is expected to be a valid file extension in all lower case matching the image data provided in field `data`.
+Field data is the logo image data, in plain text for SVG and base64 encoded for all other formats.
+
+The component will render all the logos in a single ConfigMap.
+The component will dynamically add logos to fields `data` (for SVG) and `binaryData` (for other formats) in the ConfigMap.
+
+Additionally, the component will configure an entry in `spec.customization.logos` in the `console.operator.openshift.io` custom resource to actually configure the custom logos.
+
+=== Examples
+
+.Separate logo per theme
+[source,yaml]
+----
+custom_logos:
+  dark:
+    type: svg
+    data: |
+      <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+      <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60">
+      <circle cx="30" cy="30" r="20" stroke="#fff" stroke-width="4" fill-opacity="0%"/>
+      </svg>
+  light:
+    type: svg
+    data: |
+      <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+      <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60">
+      <circle cx="30" cy="30" r="20" stroke="#000" stroke-width="4" fill-opacity="0%"/>
+      </svg>
+----
+
+.Same logo for all themes
+[source,yaml]
+----
+custom_logos:
+  '*':
+    type: svg
+    data: |
+      <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+      <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60">
+      <circle cx="30" cy="30" r="20" stroke="#f00" stroke-width="4" fill-opacity="0%"/>
+      </svg>
+----
+
+.Different file types
+[source,yaml]
+----
+custom_logos:
+  dark:
+    type: svg
+    data: | <1>
+      <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+      <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60">
+      <circle cx="30" cy="30" r="20" stroke="#fff" stroke-width="4" fill-opacity="0%"/>
+      </svg>
+  light:
+    type: png
+    data: iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAABHNCSVQICAgIfAhkiAAAA5dJREFUaIHtmk1vTUEYx39HgkTYtMTOQtVL2WiKoF5W1IpGmrTpUlLxMUTDF6B8AKp8gWqxkHbtLUQixZbqQlVvScjf4pxK89y59869Z+Zei/NPZjE39zz/35Mz85w5MwcKFSpUqFChQq1SEjO4YDNwAjgJHAB2A9tIfwf4AXwB5oA3wDNgJoHlmFxBJUgE5wQPBSsC1dlWBBOCPkW+IbklGBC8biDJSu2V4GKr8yqToFPwJGCitk0LdrU6TwAEw4KlKrBzgluCIcFBQZtgfdbast+GBGOCD1XifBcMtTLRRHC9AtxvwT3B0QZiHhOMZzFcsUebPrczsNsVgB4prcZ5PfZkQ9nlMdbUpAU3HBDLgksRvEYEJYfftdBelQCGHeafBd0RPXsE8w7fwVieq8adjgL1RbAnqjH/hrhNelHQEdPUPnqWY95Zh3+PY3hPxTIbcAyp4HPWg2PEwdEf2iRR+QpqOqhJfTyThuVl0KqtdG1sn7O5Hz05ePY5ntN9IQ0emuB3gwVvnOm+YbofKvBmlb/11LWCiiHBccNUEmwKEdgO57mmrnIqcyWCj4btTK3r1nnEPmX6UwmoMcxwyhhs4Txd6zqfhPeb/qwnUzM0Y/qWtUw+Cdtq/M4bJ74sS/4nh2DBzJO23EEDSbDVsH0NEfSXCbo+AGsQCTYatp+1rvEZ0lYtr9B55JPwD9PfEgOkQVmWpVoX+CS8YPo7vHHiy7JY1jL5JPze9Pd648RXl+lb1jL5JPzG9E9448RXr+lb1vql9ARgbSX88B8tLT/Vu7T0Cex6eTgWgDkvV69j9yX/y0MW/IEJfi9I4HxME4ZpPGRwO6x/qwkbd1V4uhwbAGdDGiSC5//RFs9Tw/IieF0RXDQmEowENfHjuOLguBDLzB59lAQ9Uczc/ocdBXQypuEupad4aw3nmzGfBXtVvhH/TbAztvGQY0jNCw5F9DziSFaCgVieFmDUYb4iuBzB64pjGEtwNbRXNYhE6ZGlhZDgsWBfAI8uRzVebTdD5FEvUFLhTq8+p8eVbqV6Py6ymL3ZouJPhdjNu7MVIAcdhWxt+yi4o/SYtVvQLtiQtfbst+HsP3ZtvLYtNm3O1pKgQzBVBTZvm4xejRuRoF/pwVaoRF8Izrc6r6rK5mGf0rMf16cKtVopm/9n65n/vor96eEm0pf0U6Sb5LuB7ZR/evgeeEv66eFsAqWYXIUKFSpUqFCh1ugvn+zZeVm8jdkAAAAASUVORK5CYII= <2>
+----
+<1> SVG needs to be configured as plain text
+<2> All other formats, such as PNG need to be configured base64 encoded
+
+== `custom_favicon`
+
+[horizontal]
+type:: dictionary
+default:: `{}`
+
+Starting with OpenShift 4.19, users can configure custom favicons for the console.
+This parameter has no effect on OpenShift versions before 4.19.
+
+OpenShift 4.19 supports specifying separate favicons for the dark and light themes, but the component currently only supports configuring a single favicon for both themes.
+
+The component looks for fields `type` and `data` in the parameter.
+Field `type` is expected to be a valid file extension in all lower case matching the image data provided in field `data`.
+Field data is the favicon data, in plain text for SVG and base64 encoded for all other formats.
+
+The component will write the favicon into a ConfigMap and configure an entry in `spec.customization.logos` in the `console.operator.openshift.io` custom resource  to enable the custom favicon for the console.
 
 == `secrets`
 

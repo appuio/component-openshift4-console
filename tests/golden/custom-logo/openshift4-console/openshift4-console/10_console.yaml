@@ -11,6 +11,35 @@ spec:
       key: logo.png
       name: console-logo
     customProductName: Company Cloud
+    logos:
+      - themes:
+          - mode: Light
+            source:
+              configMap:
+                key: light.svg
+                name: console-logos
+              from: ConfigMap
+          - mode: Dark
+            source:
+              configMap:
+                key: default.svg
+                name: console-logos
+              from: ConfigMap
+        type: Masthead
+      - themes:
+          - mode: Dark
+            source:
+              configMap:
+                key: favicon.png
+                name: console-favicon
+              from: ConfigMap
+          - mode: Light
+            source:
+              configMap:
+                key: favicon.png
+                name: console-favicon
+              from: ConfigMap
+        type: Favicon
   managementState: Managed
   plugins:
     - monitoring-plugin

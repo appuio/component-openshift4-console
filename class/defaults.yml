@@ -14,7 +14,7 @@ parameters:
       openshift.io/node-selector: ''
     openshift_version:
       Major: '4'
-      Minor: '17'
+      Minor: '19'
     route:
       console: {}
       downloads: {}
@@ -25,7 +25,11 @@ parameters:
     cert_manager_certs: {}
 
     console_links: {}
-    custom_logo: {}
+    custom_logos:
+      '*': {}
+      light: {}
+      dark: {}
+    custom_favicon: {}
 
     notifications: {}
     upgrade_notification:

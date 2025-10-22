@@ -40,6 +40,10 @@ spec:
                 name: console-favicon
               from: ConfigMap
         type: Favicon
+    perspectives:
+      - id: dev
+        visibility:
+          state: Enabled
   managementState: Managed
   plugins:
     - monitoring-plugin

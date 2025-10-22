@@ -8,6 +8,7 @@ local params = inv.parameters.openshift4_console;
 local versionGroup = 'operator.openshift.io/v1';
 
 local openshiftMinor = std.parseInt(params.openshift_version.Minor);
+local openshiftFlavor = inv.parameters.facts.distribution;
 
 local validateConfig(obj, kind='logo') =
   assert
@@ -200,6 +201,25 @@ local consoleSpec =
       }
     else
       {}
+  ) + (
+    if openshiftMinor > 18 then {
+      customization+: {
+        perspectives: [
+          {
+            id: 'dev',
+            visibility: {
+              state:
+                if openshiftFlavor == 'oke' then
+                  'Disabled'
+                else
+                  'Enabled',
+            },
+          },
+        ],
+
+      },
+    }
+    else {}
   );
 
 local faviconRoute =

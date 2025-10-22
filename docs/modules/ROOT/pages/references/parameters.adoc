@@ -63,6 +63,14 @@ A dictionary holding the `.spec` for the console config.
 
 See the https://docs.openshift.com/container-platform/latest/web_console/customizing-the-web-console.html[OpenShift docs] for available parameters.
 
+[NOTE]
+====
+The component will inject various configurations based on other parameters.
+
+Additionally, on OpenShift 4.19 and newer, the component automatically configures the console's "Developer" view state based on the cluster's distribution.
+The "Developer" view is disabled for OKE clusters and enabled for other clusters.
+====
+
 === `config.managementState`
 
 [horizontal]

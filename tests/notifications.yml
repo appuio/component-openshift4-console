@@ -1,4 +1,7 @@
 parameters:
+  facts:
+    distribution: openshift4
+
   openshift4_console:
     notifications:
       standard:

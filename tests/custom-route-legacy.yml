@@ -5,6 +5,9 @@ parameters:
         source: https://raw.githubusercontent.com/projectsyn/component-patch-operator/v1.2.0/lib/patch-operator.libsonnet
         output_path: vendor/lib/patch-operator.libsonnet
 
+  facts:
+    distribution: openshift4
+
   patch_operator:
     patch_serviceaccount:
       name: patch-sa

@@ -1,4 +1,7 @@
 parameters:
+  facts:
+    distribution: oke
+
   openshift4_console:
     config:
       plugins:

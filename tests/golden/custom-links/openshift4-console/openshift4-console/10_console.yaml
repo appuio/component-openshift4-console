@@ -7,6 +7,13 @@ metadata:
   name: cluster
 spec:
   customization:
+    capabilities:
+      - name: GettingStartedBanner
+        visibility:
+          state: Enabled
+      - name: LightspeedButton
+        visibility:
+          state: Disabled
     perspectives:
       - id: dev
         visibility:

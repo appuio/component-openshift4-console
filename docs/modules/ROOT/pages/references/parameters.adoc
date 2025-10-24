@@ -249,6 +249,18 @@ Field data is the favicon data, in plain text for SVG and base64 encoded for all
 
 The component will write the favicon into a ConfigMap and configure an entry in `spec.customization.logos` in the `console.operator.openshift.io` custom resource  to enable the custom favicon for the console.
 
+== `capabilities`
+
+[horizontal]
+type:: dictionary
+default:: [See `class/defaults.yml`]
+
+This parameter allows users to enable or disable OpenShift console capabilities.
+OpenShift 4.19 supports two capabilities: `LightspeedButton` and `GettingStartedBanner`.
+The parameter has no effect on OpenShift 4.18 and older.
+The component enables the "Getting Started" banner by default and disables the Lightspeed button by default.
+The component skips entries in this parameter which aren't defined as available capabilities for the OpenShift version specified in parameter `openshift_version`.
+
 == `secrets`
 
 [horizontal]

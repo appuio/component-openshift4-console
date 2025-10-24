@@ -220,6 +220,35 @@ local consoleSpec =
       },
     }
     else {}
+  ) + (
+    if openshiftMinor > 18 then
+      local availableCaps = {
+        '19': std.set([
+          'LightspeedButton',
+          'GettingStartedBanner',
+        ]),
+      };
+      {
+        local existingCaps = std.set(
+          [ c.name for c in std.get(super.customization, 'capabilities', []) ]
+        ),
+        customization+: {
+          capabilities+: [
+            // add capabilities that aren't configured directly via parameter
+            // `config`.
+            {
+              name: name,
+              visibility: {
+                state: params.capabilities[name],
+              },
+            }
+            for name in std.objectFields(params.capabilities)
+            if
+              !std.setMember(name, existingCaps) &&
+              std.setMember(name, availableCaps[params.openshift_version.Minor])
+          ],
+        },
+      } else {}
   );
 
 local faviconRoute =

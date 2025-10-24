@@ -31,6 +31,10 @@ parameters:
       dark: {}
     custom_favicon: {}
 
+    capabilities:
+      GettingStartedBanner: Enabled
+      LightspeedButton: Disabled
+
     notifications: {}
     upgrade_notification:
       enabled: false

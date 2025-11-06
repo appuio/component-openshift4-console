@@ -133,6 +133,8 @@ default:: `{}`
 ====
 This parameter is deprecated on OpenShift 4.19 and newer.
 Use `custom_logos` and `custom_favicon` instead.
+
+When `custom_logos` is set for OpenShift 4.19 and newer, any configuration in this parameter will be ignored.
 ====
 
 Add a custom logo to the console.
@@ -161,6 +163,8 @@ default:: https://github.com/appuio/component-openshift4-console/blob/master/cla
 Configure custom logos for the console.
 This parameter only has an effect on OpenShift 4.19 and newer.
 For older versions of OpenShift, use parameter `custom_logo`.
+
+NOTE: When setting this parameter on OpenShift 4.19 and newer, the component will ignore the contents of `custom_logo`.
 
 OpenShift 4.19 introduces a new console look with a dark and light theme.
 The new custom logo mechanism allows configuring separate logos for each theme.

@@ -14,9 +14,6 @@ spec:
       - name: LightspeedButton
         visibility:
           state: Disabled
-    customLogoFile:
-      key: logo.png
-      name: console-logo
     customProductName: Company Cloud
     logos:
       - themes:

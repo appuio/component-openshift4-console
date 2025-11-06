@@ -82,7 +82,10 @@ local favicon =
 
 local legacyLogoFileName =
   local legacy_logo = std.get(params, 'custom_logo', {});
-  if std.length(std.objectFields(legacy_logo)) > 0 then
+  // OpenShift doesn't allow `customLogoFile` and `logos` to be set at the
+  // same time, so we never try to configure the legacy `customLogoFile` if
+  // we're configuring the new `logos`.
+  if std.length(std.objectFields(legacy_logo)) > 0 && std.length(customLogos) == 0 then
     assert std.length(std.objectFields(legacy_logo)) == 1 :
            'The parameter custom_logo can only contain a single logo';
     local name = std.objectFields(legacy_logo)[0];

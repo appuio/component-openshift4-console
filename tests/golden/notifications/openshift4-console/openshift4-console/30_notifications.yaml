@@ -1,7 +1,6 @@
 apiVersion: console.openshift.io/v1
 kind: ConsoleNotification
 metadata:
-  annotations: {}
   labels:
     appuio.io/notification: 'true'
     name: custom
@@ -18,7 +17,6 @@ spec:
 apiVersion: console.openshift.io/v1
 kind: ConsoleNotification
 metadata:
-  annotations: {}
   labels:
     appuio.io/notification: 'true'
     name: standard

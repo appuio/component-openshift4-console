@@ -1,7 +1,6 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  annotations: {}
   labels:
     name: console-cluster-example-org-tls
   name: console-cluster-example-org-tls
@@ -43,7 +42,6 @@ data:
     done
 kind: ConfigMap
 metadata:
-  annotations: {}
   labels:
     name: openshift4-console-sync-console-cluster-example-org-tls
   name: openshift4-console-sync-console-cluster-example-org-tls
@@ -52,7 +50,6 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  annotations: {}
   labels:
     name: openshift4-console-sync-console-cluster-example-org-tls
   name: openshift4-console-sync-console-cluster-example-org-tls
@@ -61,7 +58,6 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  annotations: {}
   labels:
     name: openshift4-console-sync-console-cluster-example-org-tls
   name: openshift4-console-sync-console-cluster-example-org-tls
@@ -79,7 +75,6 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  annotations: {}
   labels:
     name: openshift4-console-sync-console-cluster-example-org-tls
   name: openshift4-console-sync-console-cluster-example-org-tls
@@ -98,7 +93,6 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  annotations: {}
   labels:
     name: openshift4-console-sync-console-cluster-example-org-tls
   name: openshift4-console-sync-console-cluster-example-org-tls
@@ -115,7 +109,6 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  annotations: {}
   labels:
     name: openshift4-console-sync-console-cluster-example-org-tls
   name: openshift4-console-sync-console-cluster-example-org-tls
@@ -132,7 +125,6 @@ subjects:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations: {}
   labels:
     name: openshift4-console-sync-console-cluster-example-org-tls
   name: openshift4-console-sync-console-cluster-example-org-tls

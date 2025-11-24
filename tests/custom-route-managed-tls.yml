@@ -5,7 +5,7 @@ parameters:
   kapitan:
     dependencies:
       - type: https
-        source: https://raw.githubusercontent.com/projectsyn/component-cert-manager/v2.2.0/lib/cert-manager.libsonnet
+        source: https://raw.githubusercontent.com/projectsyn/component-cert-manager/master/lib/cert-manager.libsonnet
         output_path: vendor/lib/cert-manager.libsonnet
       - type: https
         source: https://raw.githubusercontent.com/projectsyn/component-espejote/master/lib/espejote.libsonnet

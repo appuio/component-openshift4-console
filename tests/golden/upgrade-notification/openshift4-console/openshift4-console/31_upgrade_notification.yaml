@@ -4,7 +4,6 @@ data:
     "apiVersion": "console.openshift.io/v1"
     "kind": "ConsoleNotification"
     "metadata":
-      "annotations": {}
       "labels":
         "appuio.io/notification": "true"
         "appuio.io/ocp-version": "4.16"
@@ -20,7 +19,6 @@ data:
       "text": "Cluster will be upgraded to OpenShift $OVERLAY_VERSION in the maintenance window at $NEXT_MAINTENANCE"
 kind: ConfigMap
 metadata:
-  annotations: {}
   labels:
     name: upgrade-notification-template
   name: upgrade-notification-template
@@ -54,7 +52,6 @@ data:
     fi
 kind: ConfigMap
 metadata:
-  annotations: {}
   labels:
     name: console-notification-script
   name: console-notification-script
@@ -135,7 +132,6 @@ data:
     kubectl delete consolenotifications -l appuio.io/ocp-version="$OCP_MINOR"
 kind: ConfigMap
 metadata:
-  annotations: {}
   labels:
     name: cleanup-upgrade-notification
   name: cleanup-upgrade-notification

@@ -1,7 +1,6 @@
 apiVersion: console.openshift.io/v1
 kind: ConsoleLink
 metadata:
-  annotations: {}
   labels:
     name: user-docs
   name: user-docs

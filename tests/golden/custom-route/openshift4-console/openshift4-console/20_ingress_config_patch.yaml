@@ -1,28 +1,95 @@
-apiVersion: redhatcop.redhat.io/v1alpha1
-kind: Patch
+apiVersion: v1
+kind: ServiceAccount
 metadata:
   annotations:
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: '10'
+    syn.tools/source: https://github.com/appuio/component-openshift4-console.git
   labels:
-    name: ingress-cluster-96338c6a0d5b244
-  name: ingress-cluster-96338c6a0d5b244
-  namespace: syn-patch-operator
+    app.kubernetes.io/component: openshift4-console
+    app.kubernetes.io/managed-by: espejote
+    app.kubernetes.io/part-of: syn
+  name: config-openshift-io-ingresses-cluster-manager
+  namespace: syn-espejote
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  annotations:
+    syn.tools/source: https://github.com/appuio/component-openshift4-console.git
+  labels:
+    app.kubernetes.io/component: openshift4-console
+    app.kubernetes.io/managed-by: espejote
+    app.kubernetes.io/part-of: syn
+  name: syn-espejote:config-openshift-io-ingresses-cluster-manager
+rules:
+  - apiGroups:
+      - config.openshift.io
+    resourceNames:
+      - cluster
+    resources:
+      - ingresses
+    verbs:
+      - '*'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  annotations:
+    syn.tools/source: https://github.com/appuio/component-openshift4-console.git
+  labels:
+    app.kubernetes.io/component: openshift4-console
+    app.kubernetes.io/managed-by: espejote
+    app.kubernetes.io/part-of: syn
+  name: syn-espejote:config-openshift-io-ingresses-cluster-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: syn-espejote:config-openshift-io-ingresses-cluster-manager
+subjects:
+  - kind: ServiceAccount
+    name: config-openshift-io-ingresses-cluster-manager
+    namespace: syn-espejote
+---
+apiVersion: espejote.io/v1alpha1
+kind: ManagedResource
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '10'
+    syn.tools/source: https://github.com/appuio/component-openshift4-console.git
+  labels:
+    app.kubernetes.io/component: openshift4-console
+    app.kubernetes.io/managed-by: espejote
+    app.kubernetes.io/name: config-openshift-io-ingresses-cluster-manager
+    app.kubernetes.io/part-of: syn
+  name: config-openshift-io-ingresses-cluster-manager
+  namespace: syn-espejote
 spec:
-  patches:
-    ingress-cluster-96338c6a0d5b244-patch:
-      patchTemplate: |-
-        "spec":
-          "componentRoutes":
-          - "hostname": "console.cluster.example.org"
-            "name": "console"
-            "namespace": "openshift-console"
-            "servingCertKeyPairSecret":
-              "name": "console-cluster-example-org-tls"
-      patchType: application/merge-patch+json
-      targetObjectRef:
+  applyOptions:
+    force: true
+  serviceAccountRef:
+    name: config-openshift-io-ingresses-cluster-manager
+  template: |-
+    {
+        "apiVersion": "config.openshift.io/v1",
+        "kind": "Ingress",
+        "metadata": {
+            "name": "cluster"
+        },
+        "spec": {
+            "componentRoutes": [
+                {
+                    "hostname": "console.cluster.example.org",
+                    "name": "console",
+                    "namespace": "openshift-console",
+                    "servingCertKeyPairSecret": {
+                        "name": "console-cluster-example-org-tls"
+                    }
+                }
+            ]
+        }
+    }
+  triggers:
+    - name: target
+      watchResource:
         apiVersion: config.openshift.io/v1
         kind: Ingress
         name: cluster
-  serviceAccountRef:
-    name: patch-sa

@@ -1,6 +1,6 @@
+local esp = import 'lib/espejote.libsonnet';
 local kap = import 'lib/kapitan.libjsonnet';
 local kube = import 'lib/kube.libjsonnet';
-local po = import 'lib/patch-operator.libsonnet';
 
 local inv = kap.inventory();
 local params = inv.parameters.openshift4_console;
@@ -290,6 +290,14 @@ local faviconRoute =
 // ingress.config.openshift.io/cluster object
 local consoleRoutePatch =
   local target = kube._Object('config.openshift.io/v1', 'Ingress', 'cluster');
+  local mrAnnotations = {
+    'syn.tools/source': 'https://github.com/appuio/component-openshift4-console.git',
+  };
+  local mrLabels = {
+    'app.kubernetes.io/managed-by': 'espejote',
+    'app.kubernetes.io/part-of': 'syn',
+    'app.kubernetes.io/component': 'openshift4-console',
+  };
   local needsPatch =
     hostname != null || std.objectHas(params.route.downloads, 'hostname');
   if needsPatch then
@@ -316,22 +324,34 @@ local consoleRoutePatch =
       },
     };
     [
-      if obj.kind == 'Patch' then
+      if obj.kind == 'ManagedResource' then
         obj {
           metadata+: {
             annotations+: {
               // Ensure the patch is only applied after the certificate or secret
               // exists.
               'argocd.argoproj.io/sync-wave': '10',
-            },
+            } + mrAnnotations,
+            labels+: mrLabels,
           },
         }
       else
-        obj
-      for obj in po.Patch(
-        target,
-        patch,
-        patchstrategy='application/merge-patch+json'
+        obj {
+          metadata+: {
+            annotations+: mrAnnotations,
+            labels+: mrLabels,
+          },
+        }
+      for obj in esp.clusterScopedObject(
+        inv.parameters.espejote.namespace,
+        {
+          apiVersion: 'config.openshift.io/v1',
+          kind: 'Ingress',
+          metadata: {
+            name: 'cluster',
+          },
+          spec: patch.spec,
+        }
       )
     ]
   else

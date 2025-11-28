@@ -47,26 +47,26 @@ spec:
       local overlays = esp.context().clusterversion_appuio[0].spec.overlays;
       local current_minor = std.split(esp.context().clusterversion_ocp[0].spec.desiredUpdate.version, '.')[1];
       local pendingOverlays = [
-        [overlay.from, overlay.overlay.spec.channel]
+        [ overlay.from, overlay.overlay.spec.channel ]
         for overlay in overlays
         if std.objectHas(overlay.overlay.spec, 'channel')
           && std.split(overlay.overlay.spec.channel, '.')[1] > current_minor
       ];
       if std.length(pendingOverlays) > 0 then
         local next = std.sort(pendingOverlays)[0];
-        {date: next[0], channel: next[1]};
+        { date: next[0], channel: next[1] };
 
     // Finds the first upgrade window after the overlay date. Upgradeconfigs only
     // display the next 10 maintenance windows, so it's not guaranteed to find one
     // if the overlay is far in the future.
     local upgradeWindow = if nextChannelOverlay != null then
-      local possible = [t.time for t in esp.context().upgradeconfig[0].status.nextPossibleSchedules if t.time > nextChannelOverlay.date ];
+      local possible = [ t.time for t in esp.context().upgradeconfig[0].status.nextPossibleSchedules if t.time > nextChannelOverlay.date ];
       if std.length(possible) > 0 then possible[0];
 
     // Custom format datetime and calculate Europe/Zurich time based on dates where
     // daylight saving times change.
     local formatDate(date) =
-      local lastChange = std.reverse([t for t in std.objectFields(dst) if t < date])[0];
+      local lastChange = std.reverse([ t for t in std.objectFields(dst) if t < date ])[0];
       local UTCOffset = dst[lastChange];
       local parts = std.split(date, 'T');
       assert std.length(parts) == 2 : 'Expected RFC-3339 datetime to have exactly one "T"';
@@ -79,7 +79,7 @@ spec:
       assert std.length(hms) == 3 : 'Expected RFC-3339 time to have exactly two ":"';
       local h = std.toString(std.parseInt(hms[0]) + UTCOffset);
       local m = hms[1];
-      '%s.%s.%s %s:%s' % [D, M, Y, h, m];
+      '%s.%s.%s %s:%s' % [ D, M, Y, h, m ];
 
     local replacementValues = {
       '$OVERLAY_DATE': formatDate(nextChannelOverlay.date),

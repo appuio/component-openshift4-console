@@ -1,7 +1,7 @@
 local kube = import 'kube-ssa-compat.libsonnet';
 local com = import 'lib/commodore.libjsonnet';
-local kap = import 'lib/kapitan.libjsonnet';
 local esp = import 'lib/espejote.libsonnet';
+local kap = import 'lib/kapitan.libjsonnet';
 
 local inv = kap.inventory();
 local params = inv.parameters.openshift4_console;
@@ -48,22 +48,22 @@ local notificationRBAC =
       {
         apiGroups: [ 'managedupgrade.appuio.io' ],
         resources: [ 'upgradeconfigs' ],
-        verbs: [ 'get', 'list' , 'watch'],
+        verbs: [ 'get', 'list', 'watch' ],
       },
       {
         apiGroups: [ 'managedupgrade.appuio.io' ],
         resources: [ 'clusterversions' ],
-        verbs: [ 'get', 'list' , 'watch'],
+        verbs: [ 'get', 'list', 'watch' ],
       },
       {
         apiGroups: [ 'config.openshift.io' ],
         resources: [ 'clusterversions' ],
-        verbs: [ 'get', 'list' , 'watch'],
+        verbs: [ 'get', 'list', 'watch' ],
       },
       {
         apiGroups: [ 'espejote.io' ],
         resources: [ 'jsonnetlibraries' ],
-        verbs: [ 'get', 'list' , 'watch'],
+        verbs: [ 'get', 'list', 'watch' ],
       },
     ],
   };
@@ -83,7 +83,7 @@ local jsonnetlib =
     spec: {
       data: {
         'config.json': std.manifestJson({
-          notification: params.upgrade_notification.notification
+          notification: params.upgrade_notification.notification,
         }),
         'dst.json': std.manifestJson({
           '2025-10-26': 1,
@@ -187,5 +187,5 @@ local managedresource =
   rbac: if params.upgrade_notification.enabled then
     std.objectValues(notificationRBAC) else [],
   notifications: consoleNotifications,
-  upgrade_notification: if params.upgrade_notification.enabled then [managedresource, jsonnetlib] else [],
+  upgrade_notification: if params.upgrade_notification.enabled then [ managedresource, jsonnetlib ] else [],
 }

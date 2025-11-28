@@ -1,181 +1,159 @@
-apiVersion: v1
-data:
-  upgrade.yaml: |-
-    "apiVersion": "console.openshift.io/v1"
-    "kind": "ConsoleNotification"
-    "metadata":
-      "labels":
-        "appuio.io/notification": "true"
-        "appuio.io/ocp-version": "4.16"
-        "name": "upgrade-4.16"
-      "name": "upgrade-4.16"
-    "spec":
-      "backgroundColor": "#2596be"
-      "color": "#fff"
-      "link":
-        "href": "https://kb.vshn.ch/oc4/references/release_notes.html"
-        "text": "release notes"
-      "location": "BannerTop"
-      "text": "Cluster will be upgraded to OpenShift $OVERLAY_VERSION in the maintenance window at $NEXT_MAINTENANCE"
-kind: ConfigMap
-metadata:
-  labels:
-    name: upgrade-notification-template
-  name: upgrade-notification-template
-  namespace: openshift-console
----
-apiVersion: v1
-data:
-  create-console-notification.sh: |
-    #!/bin/bash
-    set -euo pipefail
-
-    echo "OVERLAY_DATE: $OVERLAY_DATE"
-    echo "OVERLAY_CHANNEL: $OVERLAY_CHANNEL"
-    echo "OVERLAY_VERSION: $OVERLAY_VERSION"
-    echo "OVERLAY_VERSION_MINOR: $OVERLAY_VERSION_MINOR"
-
-    NEXT_MAINTENANCE=$(kubectl -n appuio-openshift-upgrade-controller get upgradeconfigs -oyaml | yq '[.items[].status.nextPossibleSchedules[].time | from_yaml | select(. > env(OVERLAY_DATE))][0] | tz("Europe/Zurich") | format_datetime("02.01.2006 15:04")')
-    test -n "${NEXT_MAINTENANCE:-}" || (echo "No valid maintenance window found" && exit 1)
-    echo "NEXT_MAINTENANCE: $NEXT_MAINTENANCE"
-    export NEXT_MAINTENANCE
-
-    yq '(.. | select(tag == "!!str")) |= envsubst' template/upgrade.yaml > notification.yaml
-    cat notification.yaml
-
-    CURRENT_MINOR=$(oc version -oyaml | yq '.openshiftVersion' | cut -d'.' -f2)
-    if (( OVERLAY_VERSION_MINOR > CURRENT_MINOR )); then
-        echo "Creating console notification:"
-        kubectl apply -f notification.yaml
-    else
-        echo "Current OpenShift minor version matches channel overlay version."
-    fi
-kind: ConfigMap
-metadata:
-  labels:
-    name: console-notification-script
-  name: console-notification-script
-  namespace: openshift-console
----
-apiVersion: batch/v1
-kind: Job
+apiVersion: espejote.io/v1alpha1
+kind: ManagedResource
 metadata:
   annotations:
-    argocd.argoproj.io/hook: PostSync
-    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    syn.tools/description: |
+      Creates ConsoleNotifications to inform cluster users about scheduled minor OpenShift upgrades.
   labels:
-    name: create-upgrade-notification
-  name: create-upgrade-notification
+    app.kubernetes.io/name: minor-upgrade-notification
+  name: minor-upgrade-notification
   namespace: openshift-console
 spec:
-  completions: 1
-  parallelism: 1
-  template:
-    metadata:
-      labels:
-        name: create-upgrade-notification
-    spec:
-      containers:
-        - args: []
-          command:
-            - /scripts/create-console-notification.sh
-          env:
-            - name: OVERLAY_CHANNEL
-              value: stable-4.16
-            - name: OVERLAY_DATE
-              value: '2025-01-01T12:00:00Z'
-            - name: OVERLAY_VERSION
-              value: '4.16'
-            - name: OVERLAY_VERSION_MINOR
-              value: '16'
-          image: quay.io/appuio/oc:v4.19
-          imagePullPolicy: Always
-          name: create-console-notification
-          ports: []
-          stdin: false
-          tty: false
-          volumeMounts:
-            - mountPath: /export
-              name: export
-            - mountPath: /scripts
-              name: scripts
-            - mountPath: export/template
-              name: upgrade-notification-template
-              readOnly: true
-          workingDir: /export
-      imagePullSecrets: []
-      initContainers: []
-      restartPolicy: OnFailure
-      serviceAccountName: notification-manager
-      terminationGracePeriodSeconds: 30
-      volumes:
-        - emptyDir: {}
-          name: export
-        - configMap:
-            defaultMode: 360
-            name: console-notification-script
-          name: scripts
-        - configMap:
-            defaultMode: 360
-            name: upgrade-notification-template
-          name: upgrade-notification-template
----
-apiVersion: v1
-data:
-  cleanup-upgrade-notification.sh: |
-    #!/bin/bash
-    set -exo pipefail
+  applyOptions:
+    force: true
+  context:
+    - name: clusterversion_appuio
+      resource:
+        apiVersion: managedupgrade.appuio.io/v1beta1
+        kind: ClusterVersion
+        name: version
+        namespace: appuio-openshift-upgrade-controller
+    - name: clusterversion_ocp
+      resource:
+        apiVersion: config.openshift.io/v1
+        kind: ClusterVersion
+        name: version
+    - name: upgradeconfig
+      resource:
+        apiVersion: managedupgrade.appuio.io/v1beta1
+        kind: UpgradeConfig
+        labelSelector:
+          matchExpressions:
+            - key: argocd.argoproj.io/instance
+              operator: In
+              values:
+                - openshift-upgrade-controller
+        namespace: appuio-openshift-upgrade-controller
+  serviceAccountRef:
+    name: notification-manager
+  template: |
+    local esp = import 'espejote.libsonnet';
+    local config = import 'minor-upgrade-notification/config.json';
+    local dst = import 'minor-upgrade-notification/dst.json';
 
-    OCP_MINOR=$(echo $JOB_spec_desiredVersion_version | jq -r 'split(".") | .[0:2] | join(".")')
-    echo $OCP_MINOR
-    echo "Deleting upgrade console notification"
-    kubectl delete consolenotifications -l appuio.io/ocp-version="$OCP_MINOR"
-kind: ConfigMap
-metadata:
-  labels:
-    name: cleanup-upgrade-notification
-  name: cleanup-upgrade-notification
-  namespace: appuio-openshift-upgrade-controller
+    // Finds the next (i.e. "oldest") clusterversion overlay that sets a channel
+    // higher than the current OpenShift minor version.
+    local nextChannelOverlay =
+      local overlays = esp.context().clusterversion_appuio[0].spec.overlays;
+      local current_minor = std.split(esp.context().clusterversion_ocp[0].spec.desiredUpdate.version, '.')[1];
+      local pendingOverlays = [
+        [overlay.from, overlay.overlay.spec.channel]
+        for overlay in overlays
+        if std.objectHas(overlay.overlay.spec, 'channel')
+          && std.split(overlay.overlay.spec.channel, '.')[1] > current_minor
+      ];
+      if std.length(pendingOverlays) > 0 then
+        local next = std.sort(pendingOverlays)[0];
+        {date: next[0], channel: next[1]};
+
+    // Finds the first upgrade window after the overlay date. Upgradeconfigs only
+    // display the next 10 maintenance windows, so it's not guaranteed to find one
+    // if the overlay is far in the future.
+    local upgradeWindow = if nextChannelOverlay != null then
+      local possible = [t.time for t in esp.context().upgradeconfig[0].status.nextPossibleSchedules if t.time > nextChannelOverlay.date ];
+      if std.length(possible) > 0 then possible[0];
+
+    // Custom format datetime and calculate Europe/Zurich time based on dates where
+    // daylight saving times change.
+    local formatDate(date) =
+      local lastChange = std.reverse([t for t in std.objectFields(dst) if t < date])[0];
+      local UTCOffset = dst[lastChange];
+      local YMD = std.split(date, 'T')[0];
+      local Y = std.split(YMD, '-')[0];
+      local M = std.split(YMD, '-')[1];
+      local D = std.split(YMD, '-')[2];
+      local hms = std.split(date, 'T')[1];
+      local h = std.toString(std.parseInt(std.split(hms, ':')[0]) + UTCOffset);
+      local m = std.split(hms, ':')[1];
+      '%s.%s.%s %s:%s' % [D, M, Y, h, m];
+
+    local replacementValues = {
+      '$OVERLAY_DATE': formatDate(nextChannelOverlay.date),
+      '$NEXT_MAINTENANCE': formatDate(upgradeWindow),
+      '$OVERLAY_CHANNEL': nextChannelOverlay.channel,
+      '$OVERLAY_VERSION': std.split(nextChannelOverlay.channel, '-')[1],
+      '$OVERLAY_VERSION_MINOR': std.split(nextChannelOverlay.channel, '.')[1],
+    };
+
+    local makeConsoleNotification(name, args, repl) =
+      local replace(t, v) = std.strReplace(t, v, std.get(repl, v));
+      local text = std.foldl(replace, std.objectFields(repl), args.text);
+      {
+        apiVersion: 'console.openshift.io/v1',
+        kind: 'ConsoleNotification',
+        metadata: {
+          labels: {
+            'appuio.io/notification': 'true',
+          },
+          name: name,
+        },
+        spec: std.prune(
+          {
+            text: text,
+            location: std.get(args, 'location', 'BannerTop'),
+            color: std.get(args, 'color', '#fff'),
+            backgroundColor: std.get(args, 'backgroundColor', '#2596be'),
+            link: std.get(args, 'link'),
+          },
+        ),
+      };
+
+    if upgradeWindow != null then makeConsoleNotification('upgrade-%s' % replacementValues['$OVERLAY_VERSION'], config.notification, replacementValues)
+  triggers:
+    - name: clusterversion_appuio
+      watchContextResource:
+        name: clusterversion_appuio
+    - name: clusterversion_ocp
+      watchContextResource:
+        name: clusterversion_ocp
+    - name: upgradeconfig
+      watchContextResource:
+        name: upgradeconfig
+    - name: jsonnetlib
+      watchResource:
+        apiVersion: espejote.io/v1alpha1
+        kind: JsonnetLibrary
+        name: minor-upgrade-notification
+        namespace: openshift-console
 ---
-apiVersion: managedupgrade.appuio.io/v1beta1
-kind: UpgradeJobHook
+apiVersion: espejote.io/v1alpha1
+kind: JsonnetLibrary
 metadata:
-  annotations:
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
   labels:
-    name: cleanup-upgrade-notification
-  name: cleanup-upgrade-notification
-  namespace: appuio-openshift-upgrade-controller
+    app.kubernetes.io/name: minor-upgrade-notification
+  name: minor-upgrade-notification
+  namespace: openshift-console
 spec:
-  events:
-    - Finish
-  selector:
-    matchLabels:
-      appuio-managed-upgrade: 'true'
-  template:
-    spec:
-      template:
-        spec:
-          containers:
-            - args: []
-              command:
-                - /usr/local/bin/cleanup
-              env: []
-              image: quay.io/appuio/oc:v4.19
-              imagePullPolicy: IfNotPresent
-              name: cleanup
-              ports: []
-              stdin: false
-              tty: false
-              volumeMounts:
-                - mountPath: /usr/local/bin/cleanup
-                  name: scripts
-                  readOnly: true
-                  subPath: cleanup-upgrade-notification.sh
-          restartPolicy: Never
-          serviceAccountName: notification-manager
-          volumes:
-            - configMap:
-                defaultMode: 360
-                name: cleanup-upgrade-notification
-              name: scripts
+  data:
+    config.json: |-
+      {
+          "notification": {
+              "link": {
+                  "href": "https://kb.vshn.ch/oc4/references/release_notes.html",
+                  "text": "release notes"
+              },
+              "text": "Cluster will be upgraded to OpenShift $OVERLAY_VERSION in the maintenance window at $NEXT_MAINTENANCE"
+          }
+      }
+    dst.json: |-
+      {
+          "2025-10-26": 1,
+          "2026-03-29": 2,
+          "2026-10-25": 1,
+          "2027-03-28": 2,
+          "2027-10-31": 1,
+          "2028-03-26": 2,
+          "2028-10-29": 1,
+          "2029-03-25": 2,
+          "2029-10-28": 1
+      }

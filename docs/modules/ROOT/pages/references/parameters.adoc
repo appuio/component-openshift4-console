@@ -329,11 +329,11 @@ enabled: false
 notification: {}
 ----
 
-When upgrade notifications are enabled, this component will create an ArgoCD sync hook and an upgradejob hook which will dynamically create (and remove) a `ConsoleNotification` informing users about the next upcoming minor OCP upgrade.
+When upgrade notifications are enabled, this component will create an Espejote ManagedResource which will dynamically create (and remove) a `ConsoleNotification` informing users about the next upcoming minor OCP upgrade.
 It is based on the upgrade controller's channel overlay and the next possible maintenance dates.
 
 The values for the `upgrade_notification.notification` dictionary are the the same as for `notifications` above.
-Additionally the following variables can be used in the notification text: `OVERLAY_DATE`, `OVERLAY_CHANNEL`, `OVERLAY_VERSION`, `OVERLAY_VERSION_MINOR` and `NEXT_MAINTENANCE`, see also the example below.
+Additionally the following variables can be used in the notification text: `$OVERLAY_DATE`, `$OVERLAY_CHANNEL`, `$OVERLAY_VERSION`, `$OVERLAY_VERSION_MINOR` and `$NEXT_MAINTENANCE`, see also the example below.
 
 == Example: Custom hostname in cluster's app domain
 

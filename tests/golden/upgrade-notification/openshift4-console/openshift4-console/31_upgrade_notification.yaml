@@ -91,7 +91,7 @@ spec:
 
     local makeConsoleNotification(name, args, repl) =
       local replace(t, v) = std.strReplace(t, v, std.get(repl, v));
-      local text = std.foldl(replace, std.objectFields(repl), args.text);
+      local text = std.foldl(replace, std.reverse(std.sort(std.objectFields(repl))), args.text);
       {
         apiVersion: 'console.openshift.io/v1',
         kind: 'ConsoleNotification',

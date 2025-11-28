@@ -68,13 +68,17 @@ spec:
     local formatDate(date) =
       local lastChange = std.reverse([t for t in std.objectFields(dst) if t < date])[0];
       local UTCOffset = dst[lastChange];
-      local YMD = std.split(date, 'T')[0];
-      local Y = std.split(YMD, '-')[0];
-      local M = std.split(YMD, '-')[1];
-      local D = std.split(YMD, '-')[2];
-      local hms = std.split(date, 'T')[1];
-      local h = std.toString(std.parseInt(std.split(hms, ':')[0]) + UTCOffset);
-      local m = std.split(hms, ':')[1];
+      local parts = std.split(date, 'T');
+      assert std.length(parts) == 2 : 'Expected RFC-3339 datetime to have exactly one "T"';
+      local YMD = std.split(parts[0], '-');
+      assert std.length(YMD) == 3 : 'Expected RFC-3339 date to have exactly two "-"';
+      local Y = YMD[0];
+      local M = YMD[1];
+      local D = YMD[2];
+      local hms = std.split(parts[1], ':');
+      assert std.length(hms) == 3 : 'Expected RFC-3339 time to have exactly two ":"';
+      local h = std.toString(std.parseInt(hms[0]) + UTCOffset);
+      local m = hms[1];
       '%s.%s.%s %s:%s' % [D, M, Y, h, m];
 
     local replacementValues = {

@@ -1,4 +1,10 @@
 parameters:
+  kapitan:
+    dependencies:
+      - type: https
+        source: https://raw.githubusercontent.com/projectsyn/component-espejote/v0.16.1/lib/espejote.libsonnet
+        output_path: vendor/lib/espejote.libsonnet
+
   openshift4_console:
     openshift_version:
       Major: '4'

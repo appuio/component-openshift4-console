@@ -73,4 +73,7 @@ local makeConsoleNotification(name, args, repl) =
     ),
   };
 
-if upgradeWindow != null then makeConsoleNotification('upgrade-%s' % replacementValues['$OVERLAY_VERSION'], config.notification, replacementValues)
+if upgradeWindow != null then
+  makeConsoleNotification('minor-upgrade-notification', config.notification, replacementValues)
+else
+  esp.markForDelete(makeConsoleNotification('minor-upgrade-notification', { text: '' }, {}))

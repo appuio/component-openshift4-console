@@ -230,6 +230,10 @@ local consoleSpec =
           'LightspeedButton',
           'GettingStartedBanner',
         ]),
+        '20': std.set([
+          'LightspeedButton',
+          'GettingStartedBanner',
+        ]),
       };
       {
         local existingCaps = std.set(

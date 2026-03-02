@@ -151,7 +151,7 @@ spec:
               value: console-cluster-example-org-tls
             - name: HOME
               value: /export
-          image: quay.io/appuio/oc:v4.19
+          image: quay.io/appuio/oc:v4.20
           name: sync
           volumeMounts:
             - mountPath: /export

@@ -423,6 +423,11 @@ local notifications = import 'notifications.libsonnet';
       },
     },
   '10_console': kube._Object(versionGroup, 'Console', 'cluster') {
+    metadata+: {
+      annotations+: {
+        'argocd.argoproj.io/sync-options': 'Prune=false',
+      },
+    },
     spec+: consoleSpec,
   },
   [if faviconRoute != null then '10_console_favicon_route']:

@@ -2,6 +2,7 @@ local kube = import 'kube-ssa-compat.libsonnet';
 local cm = import 'lib/cert-manager.libsonnet';
 local com = import 'lib/commodore.libjsonnet';
 local kap = import 'lib/kapitan.libjsonnet';
+local esp = import 'lib/espejote.libsonnet';
 
 local inv = kap.inventory();
 local params = inv.parameters.openshift4_console;
@@ -78,14 +79,6 @@ local makeCert(c, cert) =
         secretName: '%s' % c,
       },
     } + com.makeMergeable(cert),
-    kube.ConfigMap('openshift4-console-sync-' + c) {
-      metadata+: {
-        namespace: params.namespace,
-      },
-      data: {
-        'reconcile-console-secret.sh': (importstr 'scripts/reconcile-console-secret.sh'),
-      },
-    },
     sa,
     sourceNsRole,
     targetNsRole,
@@ -103,75 +96,44 @@ local makeCert(c, cert) =
       subjects_: [ sa ],
       roleRef_: targetNsRole,
     },
-    kube.Deployment('openshift4-console-sync-' + c) {
+    esp.managedResource('copy-tls-secret-' + c, 'openshift4-console') {
       metadata+: {
-        namespace: params.namespace,
+        annotations+: {
+          'syn.tools/description': |||
+            Watches for the certificate secret created by cert-manager in the web console namespace and copies it to the openshift-config namespace, where the web console picks it up from. 
+          |||,
+          'syn.tools/managed-by': 'espejote',
+        },
       },
-      spec+: {
-        strategy: {
-          type: 'Recreate',
-        },
-        replicas: 1,
-        selector: {
-          matchLabels: {
-            app: 'openshift4-console-sync-' + c,
-          },
-        },
-        template+: {
-          metadata: {
-            labels: {
-              app: 'openshift4-console-sync-' + c,
+      spec: {
+        triggers: [
+          {
+            name: 'copy-tls-secret',
+            watchResource: {
+              apiVersion: 'v1',
+              kind: 'Secret',
+              name: c,
             },
           },
-          spec+: {
-            serviceAccountName: 'openshift4-console-sync-' + c,
-            containers: [
-              {
-                name: 'sync',
-                image: '%(registry)s/%(repository)s:%(tag)s' % params.images.oc,
-                workingDir: '/export',
-                env: [
-                  {
-                    name: 'SECRET_NAME',
-                    value: c,
-                  },
-                  {
-                    name: 'HOME',
-                    value: '/export',
-                  },
-                ],
-                command: [
-                  '/scripts/reconcile-console-secret.sh',
-                ],
-                volumeMounts: [
-                  {
-                    name: 'export',
-                    mountPath: '/export',
-                  },
-                  {
-                    name: 'scripts',
-                    mountPath: '/scripts',
-                  },
-                ],
-              },
-            ],
-            volumes: [
-              {
-                name: 'scripts',
-                configMap: {
-                  name: 'openshift4-console-sync-' + c,
-                  defaultMode: 365,  // 365 = 0555
-                },
-              },
-              {
-                name: 'export',
-                emptyDir: {},
-              },
-            ],
-          },
+        ],
+        serviceAccountRef: {
+          name: sa.metadata.name,
         },
+        template: |||
+          local esp = import 'espejote.libsonnet';
+          local triggerData = esp.triggerData().resource;
+          triggerData {
+            metadata+: {
+              namespace: 'openshift-config',
+              labels+: {
+                'espejote.io/created-by': 'copy-tls-secret-%s',
+                'app.kubernetes.io/managed-by': 'espejote',
+              }
+            },
+          }
+        ||| % c,
       },
-    },
+    }
   ];
 
 local certs =

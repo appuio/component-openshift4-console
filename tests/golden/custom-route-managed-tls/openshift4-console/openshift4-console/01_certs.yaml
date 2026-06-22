@@ -129,7 +129,8 @@ spec:
           metadata: {
             name: resource.metadata.name,
             namespace: 'openshift-config',
-        },
+          }
+        }
       )
   triggers:
     - name: copy-tls-secret

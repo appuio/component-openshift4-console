@@ -144,7 +144,8 @@ local makeCert(c, cert) =
                 metadata: {
                   name: resource.metadata.name,
                   namespace: 'openshift-config',
-              },
+                }
+              }
             )
         ||| % c,
       },

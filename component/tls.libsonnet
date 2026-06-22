@@ -121,16 +121,31 @@ local makeCert(c, cert) =
         },
         template: |||
           local esp = import 'espejote.libsonnet';
-          local triggerData = esp.triggerData().resource;
-          triggerData {
-            metadata+: {
-              namespace: 'openshift-config',
-              labels+: {
-                'espejote.io/created-by': 'copy-tls-secret-%s',
-                'app.kubernetes.io/managed-by': 'espejote',
-              }
-            },
-          }
+          local resource = esp.triggerData().resource;
+          local inDelete(obj) = std.get(obj.metadata, 'deletionTimestamp', '') != '';
+
+          if !inDelete(resource) then
+            resource {
+              metadata+: {
+                namespace: 'openshift-config',
+                labels+: {
+                  'espejote.io/created-by': 'copy-tls-secret-%s',
+                  'app.kubernetes.io/managed-by': 'espejote',
+                  'app.kubernetes.io/part-of': 'syn',
+                  'app.kubernetes.io/component': 'openshift4-console',
+                }
+              },
+            }
+          else
+            esp.markForDelete(
+              {
+                apiVersion: resource.apiVersion,
+                kind: resource.kind,
+                metadata: {
+                  name: resource.metadata.name,
+                  namespace: 'openshift-config',
+              },
+            )
         ||| % c,
       },
     },

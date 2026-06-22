@@ -100,9 +100,13 @@ local makeCert(c, cert) =
       metadata+: {
         annotations+: {
           'syn.tools/description': |||
-            Watches for the certificate secret created by cert-manager in the web console namespace and copies it to the openshift-config namespace, where the web console picks it up from. 
+            Watches for the certificate secret created by cert-manager in the web console namespace and copies it to the openshift-config namespace, where the web console picks it up from.
           |||,
-          'syn.tools/managed-by': 'espejote',
+        },
+        labels+: {
+          'app.kubernetes.io/managed-by': 'espejote',
+          'app.kubernetes.io/part-of': 'syn',
+          'app.kubernetes.io/component': 'openshift4-console',
         },
       },
       spec: {
@@ -119,35 +123,7 @@ local makeCert(c, cert) =
         serviceAccountRef: {
           name: sa.metadata.name,
         },
-        template: |||
-          local esp = import 'espejote.libsonnet';
-          local resource = esp.triggerData().resource;
-          local inDelete(obj) = std.get(obj.metadata, 'deletionTimestamp', '') != '';
-
-          if !inDelete(resource) then
-            resource {
-              metadata+: {
-                namespace: 'openshift-config',
-                labels+: {
-                  'espejote.io/created-by': 'copy-tls-secret-%s',
-                  'app.kubernetes.io/managed-by': 'espejote',
-                  'app.kubernetes.io/part-of': 'syn',
-                  'app.kubernetes.io/component': 'openshift4-console',
-                }
-              },
-            }
-          else
-            esp.markForDelete(
-              {
-                apiVersion: resource.apiVersion,
-                kind: resource.kind,
-                metadata: {
-                  name: resource.metadata.name,
-                  namespace: 'openshift-config',
-                }
-              }
-            )
-        ||| % c,
+        template: importstr 'espejote-templates/copy-console-tls-secret.jsonnet',
       },
     },
   ];

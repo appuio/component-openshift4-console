@@ -4,7 +4,7 @@ parameters:
       - type: https
         source: https://raw.githubusercontent.com/projectsyn/component-espejote/master/lib/espejote.libsonnet
         output_path: vendor/lib/espejote.libsonnet
-        
+
   facts:
     distribution: openshift4
 

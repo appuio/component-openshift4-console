@@ -93,12 +93,13 @@ kind: ManagedResource
 metadata:
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    syn.tools/description: "Watches for the certificate secret created by cert-manager\
-      \ in the web console namespace and copies it to the openshift-config namespace,\
-      \ where the web console picks it up from. \n"
-    syn.tools/managed-by: espejote
+    syn.tools/description: |
+      Watches for the certificate secret created by cert-manager in the web console namespace and copies it to the openshift-config namespace, where the web console picks it up from.
   labels:
+    app.kubernetes.io/component: openshift4-console
+    app.kubernetes.io/managed-by: espejote
     app.kubernetes.io/name: copy-tls-secret-console-cluster-example-org-tls
+    app.kubernetes.io/part-of: syn
   name: copy-tls-secret-console-cluster-example-org-tls
   namespace: openshift-console
 spec:
@@ -109,29 +110,29 @@ spec:
     local resource = esp.triggerData().resource;
     local inDelete(obj) = std.get(obj.metadata, 'deletionTimestamp', '') != '';
 
-    if !inDelete(resource) then
-      resource {
-        metadata+: {
-          namespace: 'openshift-config',
-          labels+: {
-            'espejote.io/created-by': 'copy-tls-secret-console-cluster-example-org-tls',
-            'app.kubernetes.io/managed-by': 'espejote',
-            'app.kubernetes.io/part-of': 'syn',
-            'app.kubernetes.io/component': 'openshift4-console',
-          }
-        },
-      }
-    else
-      esp.markForDelete(
-        {
-          apiVersion: resource.apiVersion,
-          kind: resource.kind,
-          metadata: {
-            name: resource.metadata.name,
+    if resource != null then
+      if !inDelete(resource) then
+        resource {
+          metadata+: {
             namespace: 'openshift-config',
-          }
+            labels+: {
+              'app.kubernetes.io/managed-by': 'espejote',
+              'app.kubernetes.io/part-of': 'syn',
+              'app.kubernetes.io/component': 'openshift4-console',
+            },
+          },
         }
-      )
+      else
+        esp.markForDelete(
+          {
+            apiVersion: resource.apiVersion,
+            kind: resource.kind,
+            metadata: {
+              name: resource.metadata.name,
+              namespace: 'openshift-config',
+            },
+          }
+        )
   triggers:
     - name: copy-tls-secret
       watchResource:

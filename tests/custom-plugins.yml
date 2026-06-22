@@ -7,7 +7,7 @@ parameters:
 
   facts:
     distribution: oke
-  
+
   espejote:
     namespace: syn-espejote
 

@@ -453,15 +453,7 @@ local notifications = import 'notifications.libsonnet';
         [favicon.key]: favicon.data,
       },
     },
-  '10_console': kube._Object(versionGroup, 'Console', 'cluster') {
-    metadata+: {
-      annotations+: {
-        'argocd.argoproj.io/sync-options': 'Prune=false',
-      },
-    },
-    spec+: consoleSpec,
-  },
-  '10_console_mr': consolePatch,
+  '10_console': consolePatch,
   [if faviconRoute != null then '10_console_favicon_route']:
     faviconRoute,
   [if consoleRoutePatch != null then '20_ingress_config_patch']:

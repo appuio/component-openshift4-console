@@ -96,6 +96,7 @@ metadata:
     syn.tools/description: "Watches for the certificate secret created by cert-manager\
       \ in the web console namespace and copies it to the openshift-config namespace,\
       \ where the web console picks it up from. \n"
+    syn.tools/managed-by: espejote
   labels:
     app.kubernetes.io/name: copy-tls-secret-console-cluster-example-org-tls
   name: copy-tls-secret-console-cluster-example-org-tls
@@ -111,6 +112,7 @@ spec:
         namespace: 'openshift-config',
         labels+: {
           'espejote.io/created-by': 'copy-tls-secret-console-cluster-example-org-tls',
+          'app.kubernetes.io/managed-by': 'espejote',
         }
       },
     }

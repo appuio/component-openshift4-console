@@ -258,6 +258,37 @@ local consoleSpec =
       } else {}
   );
 
+// Create ManagedResource and associated objects for the cluster-scoped
+// console.operator.openshift.io/cluster object
+local consolePatch =
+  local mrAnnotations = {
+    'syn.tools/source': 'https://github.com/appuio/component-openshift4-console.git',
+  };
+  local mrLabels = {
+    'app.kubernetes.io/managed-by': 'espejote',
+    'app.kubernetes.io/part-of': 'syn',
+    'app.kubernetes.io/component': 'openshift4-console',
+  };
+  [
+    obj {
+      metadata+: {
+        annotations+: mrAnnotations,
+        labels+: mrLabels,
+      },
+    }
+    for obj in esp.clusterScopedObject(
+      inv.parameters.espejote.namespace,
+      {
+        apiVersion: versionGroup,
+        kind: 'Console',
+        metadata: {
+          name: 'cluster',
+        },
+        spec: consoleSpec,
+      }
+    )
+  ];
+
 local faviconRoute =
   if legacyLogoFileName != '' && hostname != null then
     kube._Object('route.openshift.io/v1', 'Route', 'console-favicon') {
@@ -430,6 +461,7 @@ local notifications = import 'notifications.libsonnet';
     },
     spec+: consoleSpec,
   },
+  '10_console_mr': consolePatch,
   [if faviconRoute != null then '10_console_favicon_route']:
     faviconRoute,
   [if consoleRoutePatch != null then '20_ingress_config_patch']:

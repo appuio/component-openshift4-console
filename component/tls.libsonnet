@@ -1,8 +1,8 @@
 local kube = import 'kube-ssa-compat.libsonnet';
 local cm = import 'lib/cert-manager.libsonnet';
 local com = import 'lib/commodore.libjsonnet';
-local kap = import 'lib/kapitan.libjsonnet';
 local esp = import 'lib/espejote.libsonnet';
+local kap = import 'lib/kapitan.libjsonnet';
 
 local inv = kap.inventory();
 local params = inv.parameters.openshift4_console;
@@ -133,7 +133,7 @@ local makeCert(c, cert) =
           }
         ||| % c,
       },
-    }
+    },
   ];
 
 local certs =

@@ -53,6 +53,7 @@ apiVersion: espejote.io/v1alpha1
 kind: ManagedResource
 metadata:
   annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: '10'
     syn.tools/source: https://github.com/appuio/component-openshift4-console.git
   labels:

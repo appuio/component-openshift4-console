@@ -96,7 +96,7 @@ local makeCert(c, cert) =
       subjects_: [ sa ],
       roleRef_: targetNsRole,
     },
-    esp.managedResource('copy-tls-secret-' + c, 'openshift4-console') {
+    esp.managedResource('copy-tls-secret-' + c, 'openshift-console') {
       metadata+: {
         annotations+: {
           'syn.tools/description': |||

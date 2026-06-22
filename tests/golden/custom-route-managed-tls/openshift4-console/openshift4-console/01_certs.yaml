@@ -100,7 +100,7 @@ metadata:
   labels:
     app.kubernetes.io/name: copy-tls-secret-console-cluster-example-org-tls
   name: copy-tls-secret-console-cluster-example-org-tls
-  namespace: openshift4-console
+  namespace: openshift-console
 spec:
   serviceAccountRef:
     name: openshift4-console-sync-console-cluster-example-org-tls

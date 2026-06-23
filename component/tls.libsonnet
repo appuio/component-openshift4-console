@@ -110,6 +110,9 @@ local makeCert(c, cert) =
         },
       },
       spec: {
+        applyOptions: {
+          force: true,
+        },
         triggers: [
           {
             name: 'copy-tls-secret',

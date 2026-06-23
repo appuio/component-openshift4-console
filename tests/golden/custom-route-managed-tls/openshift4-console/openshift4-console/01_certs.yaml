@@ -103,6 +103,8 @@ metadata:
   name: copy-tls-secret-console-cluster-example-org-tls
   namespace: openshift-console
 spec:
+  applyOptions:
+    force: true
   serviceAccountRef:
     name: openshift4-console-sync-console-cluster-example-org-tls
   template: |

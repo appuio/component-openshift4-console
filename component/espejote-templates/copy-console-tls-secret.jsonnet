@@ -7,15 +7,21 @@ local configNs = 'openshift-config';
 if esp.triggerName() == 'copy-tls-secret' && triggerData.resource != null then
   local res = triggerData.resource;
   if !inDelete(res) then
-    res {
-      metadata+: {
+    {
+      apiVersion: res.apiVersion,
+      kind: res.kind,
+      metadata: {
+        name: res.metadata.name,
         namespace: configNs,
-        labels+: {
+        annotations: res.metadata.annotations,
+        labels: res.metadata.labels + {
           'app.kubernetes.io/managed-by': 'espejote',
           'app.kubernetes.io/part-of': 'syn',
           'app.kubernetes.io/component': 'openshift4-console',
         },
       },
+      type: res.type,
+      data: res.data,
     }
   else
     esp.markForDelete(

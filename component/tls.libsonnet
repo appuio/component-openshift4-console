@@ -62,7 +62,7 @@ local makeCert(c, cert) =
       {
         apiGroups: [ '' ],
         resources: [ 'secrets' ],
-        verbs: [ 'get', 'create', 'update', 'patch' ],
+        verbs: [ 'get', 'list', 'watch', 'create', 'update', 'patch' ],
       },
     ],
   };
@@ -100,11 +100,13 @@ local makeCert(c, cert) =
       metadata+: {
         annotations+: {
           'syn.tools/description': |||
-            Watches for the certificate secret created by cert-manager in the web console namespace and copies it to the openshift-config namespace, where the web console picks it up from.
+            Watches for the certificate secret created by cert-manager in the
+            web console namespace and copies it to the openshift-config namespace,
+            where the web console picks it up from.
           |||,
         },
         labels+: {
-          'app.kubernetes.io/managed-by': 'espejote',
+          'app.kubernetes.io/managed-by': 'commodore',
           'app.kubernetes.io/part-of': 'syn',
           'app.kubernetes.io/component': 'openshift4-console',
         },
@@ -113,13 +115,31 @@ local makeCert(c, cert) =
         applyOptions: {
           force: true,
         },
+        context: [
+          {
+            name: 'source_secret',
+            resource: {
+              apiVersion: 'v1',
+              kind: 'Secret',
+              name: c,
+              namespace: params.namespace,
+            },
+          },
+        ],
         triggers: [
           {
-            name: 'copy-tls-secret',
+            name: 'watch-source-tls-secret',
+            watchContextResource: {
+              name: 'source_secret',
+            },
+          },
+          {
+            name: 'watch-target-tls-secret',
             watchResource: {
               apiVersion: 'v1',
               kind: 'Secret',
               name: c,
+              namespace: 'openshift-config',
             },
           },
         ],

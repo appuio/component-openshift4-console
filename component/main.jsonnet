@@ -265,7 +265,7 @@ local consolePatch =
     'syn.tools/source': 'https://github.com/appuio/component-openshift4-console.git',
   };
   local mrLabels = {
-    'app.kubernetes.io/managed-by': 'espejote',
+    'app.kubernetes.io/managed-by': 'commodore',
     'app.kubernetes.io/part-of': 'syn',
     'app.kubernetes.io/component': 'openshift4-console',
   };
@@ -329,7 +329,7 @@ local consoleRoutePatch =
     'syn.tools/source': 'https://github.com/appuio/component-openshift4-console.git',
   };
   local mrLabels = {
-    'app.kubernetes.io/managed-by': 'espejote',
+    'app.kubernetes.io/managed-by': 'commodore',
     'app.kubernetes.io/part-of': 'syn',
     'app.kubernetes.io/component': 'openshift4-console',
   };

@@ -5,7 +5,7 @@ metadata:
     syn.tools/source: https://github.com/appuio/component-openshift4-console.git
   labels:
     app.kubernetes.io/component: openshift4-console
-    app.kubernetes.io/managed-by: espejote
+    app.kubernetes.io/managed-by: commodore
     app.kubernetes.io/part-of: syn
   name: config-openshift-io-ingresses-cluster-manager
   namespace: syn-espejote
@@ -17,7 +17,7 @@ metadata:
     syn.tools/source: https://github.com/appuio/component-openshift4-console.git
   labels:
     app.kubernetes.io/component: openshift4-console
-    app.kubernetes.io/managed-by: espejote
+    app.kubernetes.io/managed-by: commodore
     app.kubernetes.io/part-of: syn
   name: syn-espejote:config-openshift-io-ingresses-cluster-manager
 rules:
@@ -37,7 +37,7 @@ metadata:
     syn.tools/source: https://github.com/appuio/component-openshift4-console.git
   labels:
     app.kubernetes.io/component: openshift4-console
-    app.kubernetes.io/managed-by: espejote
+    app.kubernetes.io/managed-by: commodore
     app.kubernetes.io/part-of: syn
   name: syn-espejote:config-openshift-io-ingresses-cluster-manager
 roleRef:
@@ -58,7 +58,7 @@ metadata:
     syn.tools/source: https://github.com/appuio/component-openshift4-console.git
   labels:
     app.kubernetes.io/component: openshift4-console
-    app.kubernetes.io/managed-by: espejote
+    app.kubernetes.io/managed-by: commodore
     app.kubernetes.io/name: config-openshift-io-ingresses-cluster-manager
     app.kubernetes.io/part-of: syn
   name: config-openshift-io-ingresses-cluster-manager

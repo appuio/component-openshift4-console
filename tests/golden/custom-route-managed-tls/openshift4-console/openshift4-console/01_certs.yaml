@@ -52,6 +52,8 @@ rules:
       - secrets
     verbs:
       - get
+      - list
+      - watch
       - create
       - update
       - patch
@@ -94,10 +96,12 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     syn.tools/description: |
-      Watches for the certificate secret created by cert-manager in the web console namespace and copies it to the openshift-config namespace, where the web console picks it up from.
+      Watches for the certificate secret created by cert-manager in the
+      web console namespace and copies it to the openshift-config namespace,
+      where the web console picks it up from.
   labels:
     app.kubernetes.io/component: openshift4-console
-    app.kubernetes.io/managed-by: espejote
+    app.kubernetes.io/managed-by: commodore
     app.kubernetes.io/name: copy-tls-secret-console-cluster-example-org-tls
     app.kubernetes.io/part-of: syn
   name: copy-tls-secret-console-cluster-example-org-tls
@@ -105,48 +109,65 @@ metadata:
 spec:
   applyOptions:
     force: true
+  context:
+    - name: source_secret
+      resource:
+        apiVersion: v1
+        kind: Secret
+        name: console-cluster-example-org-tls
+        namespace: openshift-console
   serviceAccountRef:
     name: openshift4-console-sync-console-cluster-example-org-tls
   template: |
     local esp = import 'espejote.libsonnet';
-    local triggerData = esp.triggerData();
     local inDelete(obj) = std.get(obj.metadata, 'deletionTimestamp', '') != '';
 
     local configNs = 'openshift-config';
+    local source = esp.context().source_secret;
+    assert
+      std.length(source) == 1
+      : 'Expected source context to have exactly 1 element';
+    assert
+      source[0].kind == 'Secret'
+      : 'Expected source to be a `Secret`, is a `%s`' % source[0].kind;
 
-    if esp.triggerName() == 'copy-tls-secret' && triggerData.resource != null then
-      local res = triggerData.resource;
-      if !inDelete(res) then
+    local sourceSecret = source[0];
+
+    if sourceSecret != null && !inDelete(sourceSecret) then
+      {
+        apiVersion: sourceSecret.apiVersion,
+        kind: sourceSecret.kind,
+        metadata: {
+          name: sourceSecret.metadata.name,
+          namespace: configNs,
+          annotations: sourceSecret.metadata.annotations,
+          labels: sourceSecret.metadata.labels {
+            'app.kubernetes.io/managed-by': 'espejote',
+            'app.kubernetes.io/part-of': 'syn',
+            'app.kubernetes.io/component': 'openshift4-console',
+          },
+        },
+        type: sourceSecret.type,
+        data: sourceSecret.data,
+      }
+    else
+      esp.markForDelete(
         {
-          apiVersion: res.apiVersion,
-          kind: res.kind,
-          metadata+: {
-            name: res.metadata.name,
+          apiVersion: sourceSecret.apiVersion,
+          kind: sourceSecret.kind,
+          metadata: {
+            name: sourceSecret.metadata.name,
             namespace: configNs,
-            annotations: res.metadata.annotations,
-            labels: res.metadata.labels + {
-              'app.kubernetes.io/managed-by': 'espejote',
-              'app.kubernetes.io/part-of': 'syn',
-              'app.kubernetes.io/component': 'openshift4-console',
-            },
-            type: res.type,
-            data: res.data,
           },
         }
-      else
-        esp.markForDelete(
-          {
-            apiVersion: res.apiVersion,
-            kind: res.kind,
-            metadata: {
-              name: res.metadata.name,
-              namespace: configNs,
-            },
-          }
-        )
+      )
   triggers:
-    - name: copy-tls-secret
+    - name: watch-source-tls-secret
+      watchContextResource:
+        name: source_secret
+    - name: watch-target-tls-secret
       watchResource:
         apiVersion: v1
         kind: Secret
         name: console-cluster-example-org-tls
+        namespace: openshift-config

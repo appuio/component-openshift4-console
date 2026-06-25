@@ -1,25 +1,114 @@
-apiVersion: operator.openshift.io/v1
-kind: Console
+apiVersion: v1
+kind: ServiceAccount
 metadata:
   annotations:
-    argocd.argoproj.io/sync-options: Prune=false
+    syn.tools/source: https://github.com/appuio/component-openshift4-console.git
   labels:
-    name: cluster
-  name: cluster
+    app.kubernetes.io/component: openshift4-console
+    app.kubernetes.io/managed-by: commodore
+    app.kubernetes.io/part-of: syn
+  name: operator-openshift-io-consoles-cluster-manager
+  namespace: syn-espejote
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  annotations:
+    syn.tools/source: https://github.com/appuio/component-openshift4-console.git
+  labels:
+    app.kubernetes.io/component: openshift4-console
+    app.kubernetes.io/managed-by: commodore
+    app.kubernetes.io/part-of: syn
+  name: syn-espejote:operator-openshift-io-consoles-cluster-manager
+rules:
+  - apiGroups:
+      - operator.openshift.io
+    resourceNames:
+      - cluster
+    resources:
+      - consoles
+    verbs:
+      - '*'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  annotations:
+    syn.tools/source: https://github.com/appuio/component-openshift4-console.git
+  labels:
+    app.kubernetes.io/component: openshift4-console
+    app.kubernetes.io/managed-by: commodore
+    app.kubernetes.io/part-of: syn
+  name: syn-espejote:operator-openshift-io-consoles-cluster-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: syn-espejote:operator-openshift-io-consoles-cluster-manager
+subjects:
+  - kind: ServiceAccount
+    name: operator-openshift-io-consoles-cluster-manager
+    namespace: syn-espejote
+---
+apiVersion: espejote.io/v1alpha1
+kind: ManagedResource
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    syn.tools/source: https://github.com/appuio/component-openshift4-console.git
+  labels:
+    app.kubernetes.io/component: openshift4-console
+    app.kubernetes.io/managed-by: commodore
+    app.kubernetes.io/name: operator-openshift-io-consoles-cluster-manager
+    app.kubernetes.io/part-of: syn
+  name: operator-openshift-io-consoles-cluster-manager
+  namespace: syn-espejote
 spec:
-  customization:
-    capabilities:
-      - name: GettingStartedBanner
-        visibility:
-          state: Enabled
-      - name: LightspeedButton
-        visibility:
-          state: Disabled
-    perspectives:
-      - id: dev
-        visibility:
-          state: Enabled
-  managementState: Managed
-  plugins:
-    - monitoring-plugin
-    - networking-console-plugin
+  applyOptions:
+    force: true
+  serviceAccountRef:
+    name: operator-openshift-io-consoles-cluster-manager
+  template: |-
+    {
+        "apiVersion": "operator.openshift.io/v1",
+        "kind": "Console",
+        "metadata": {
+            "name": "cluster"
+        },
+        "spec": {
+            "customization": {
+                "capabilities": [
+                    {
+                        "name": "GettingStartedBanner",
+                        "visibility": {
+                            "state": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "LightspeedButton",
+                        "visibility": {
+                            "state": "Disabled"
+                        }
+                    }
+                ],
+                "perspectives": [
+                    {
+                        "id": "dev",
+                        "visibility": {
+                            "state": "Enabled"
+                        }
+                    }
+                ]
+            },
+            "managementState": "Managed",
+            "plugins": [
+                "monitoring-plugin",
+                "networking-console-plugin"
+            ]
+        }
+    }
+  triggers:
+    - name: target
+      watchResource:
+        apiVersion: operator.openshift.io/v1
+        kind: Console
+        name: cluster

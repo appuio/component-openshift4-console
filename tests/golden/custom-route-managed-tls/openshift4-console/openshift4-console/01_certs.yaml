@@ -14,40 +14,6 @@ spec:
   secretName: console-cluster-example-org-tls
 ---
 apiVersion: v1
-data:
-  reconcile-console-secret.sh: |
-    #!/bin/bash
-    set -euo pipefail
-
-    test -n "${SECRET_NAME:-}" || (echo "SECRET_NAME is required" && exit 1)
-
-    source_namespace="openshift-console"
-    target_namespace="openshift-config"
-
-    # # Wait for the secret to be created before trying to get it.
-    # # TODO: --for=create is included with OCP 4.17
-    # kubectl -n "${source_namespace}" wait secret "${SECRET_NAME}" --for=create --timeout=30m
-    echo "Waiting for secret ${SECRET_NAME} to be created"
-    while test -z "$(kubectl -n "${source_namespace}" get secret "${SECRET_NAME}" --ignore-not-found -oname)" ; do
-       printf "."
-       sleep 1
-    done
-    printf "\n"
-
-    # When using -w flag kubectl returns the secret once on startup and then again when it changes.
-    kubectl -n "${source_namespace}" get secret "${SECRET_NAME}" -ojson -w | jq -c --unbuffered | while read -r secret ; do
-       echo "Syncing secret: $(printf "%s" "$secret" | jq -r '.metadata.name')"
-
-       kubectl -n "$target_namespace" apply --server-side -f <(printf "%s" "$secret" | jq '{"apiVersion": .apiVersion, "kind": .kind, "metadata": {"name": .metadata.name}, "type": .type, "data": .data}')
-    done
-kind: ConfigMap
-metadata:
-  labels:
-    name: openshift4-console-sync-console-cluster-example-org-tls
-  name: openshift4-console-sync-console-cluster-example-org-tls
-  namespace: openshift-console
----
-apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
@@ -86,6 +52,8 @@ rules:
       - secrets
     verbs:
       - get
+      - list
+      - watch
       - create
       - update
       - patch
@@ -122,51 +90,84 @@ subjects:
     name: openshift4-console-sync-console-cluster-example-org-tls
     namespace: openshift-console
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: espejote.io/v1alpha1
+kind: ManagedResource
 metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    syn.tools/description: |
+      Watches for the certificate secret created by cert-manager in the
+      web console namespace and copies it to the openshift-config namespace,
+      where the web console picks it up from.
   labels:
-    name: openshift4-console-sync-console-cluster-example-org-tls
-  name: openshift4-console-sync-console-cluster-example-org-tls
+    app.kubernetes.io/component: openshift4-console
+    app.kubernetes.io/managed-by: commodore
+    app.kubernetes.io/name: copy-tls-secret-console-cluster-example-org-tls
+    app.kubernetes.io/part-of: syn
+  name: copy-tls-secret-console-cluster-example-org-tls
   namespace: openshift-console
 spec:
-  minReadySeconds: 30
-  replicas: 1
-  revisionHistoryLimit: 10
-  selector:
-    matchLabels:
-      app: openshift4-console-sync-console-cluster-example-org-tls
-  strategy:
-    type: Recreate
-  template:
-    metadata:
-      labels:
-        app: openshift4-console-sync-console-cluster-example-org-tls
-    spec:
-      containers:
-        - command:
-            - /scripts/reconcile-console-secret.sh
-          env:
-            - name: SECRET_NAME
-              value: console-cluster-example-org-tls
-            - name: HOME
-              value: /export
-          image: quay.io/appuio/oc:v4.20
-          name: sync
-          volumeMounts:
-            - mountPath: /export
-              name: export
-            - mountPath: /scripts
-              name: scripts
-          workingDir: /export
-      imagePullSecrets: []
-      initContainers: []
-      serviceAccountName: openshift4-console-sync-console-cluster-example-org-tls
-      terminationGracePeriodSeconds: 30
-      volumes:
-        - configMap:
-            defaultMode: 365
-            name: openshift4-console-sync-console-cluster-example-org-tls
-          name: scripts
-        - emptyDir: {}
-          name: export
+  applyOptions:
+    force: true
+  context:
+    - name: source_secret
+      resource:
+        apiVersion: v1
+        kind: Secret
+        name: console-cluster-example-org-tls
+        namespace: openshift-console
+  serviceAccountRef:
+    name: openshift4-console-sync-console-cluster-example-org-tls
+  template: |
+    local esp = import 'espejote.libsonnet';
+    local inDelete(obj) = std.get(obj.metadata, 'deletionTimestamp', '') != '';
+
+    local configNs = 'openshift-config';
+    local source = esp.context().source_secret;
+    assert
+      std.length(source) == 1
+      : 'Expected source context to have exactly 1 element';
+    assert
+      source[0].kind == 'Secret'
+      : 'Expected source to be a `Secret`, is a `%s`' % source[0].kind;
+
+    local sourceSecret = source[0];
+
+    if sourceSecret != null && !inDelete(sourceSecret) then
+      {
+        apiVersion: sourceSecret.apiVersion,
+        kind: sourceSecret.kind,
+        metadata: {
+          name: sourceSecret.metadata.name,
+          namespace: configNs,
+          annotations: sourceSecret.metadata.annotations,
+          labels: sourceSecret.metadata.labels {
+            'app.kubernetes.io/managed-by': 'espejote',
+            'app.kubernetes.io/part-of': 'syn',
+            'app.kubernetes.io/component': 'openshift4-console',
+          },
+        },
+        type: sourceSecret.type,
+        data: sourceSecret.data,
+      }
+    else
+      esp.markForDelete(
+        {
+          apiVersion: sourceSecret.apiVersion,
+          kind: sourceSecret.kind,
+          metadata: {
+            name: sourceSecret.metadata.name,
+            namespace: configNs,
+          },
+        }
+      )
+  triggers:
+    - name: watch-source-tls-secret
+      watchContextResource:
+        name: source_secret
+    - name: watch-target-tls-secret
+      watchResource:
+        apiVersion: v1
+        kind: Secret
+        name: console-cluster-example-org-tls
+        namespace: openshift-config

@@ -112,9 +112,20 @@ spec:
         ),
       };
 
-    if upgradeWindow != null then
-      makeConsoleNotification('minor-upgrade-notification', config.notification, replacementValues)
-    else
+    local updateDynamicFacts(nextDate, nextVersion) =
+      config.additionalFactsConfigMap {
+        data: {
+          facts: std.manifestJson({
+            openshiftNextMinorDate: nextDate,
+            openshiftNextMinorVersion: nextVersion,
+          }),
+        },
+      };
+
+    if upgradeWindow != null then [
+      makeConsoleNotification('minor-upgrade-notification', config.notification, replacementValues),
+      updateDynamicFacts(std.get(replacementValues, '$NEXT_MAINTENANCE', 'N/A'), std.get(replacementValues, '$OVERLAY_VERSION', 'N/A')),
+    ] else
       esp.markForDelete(makeConsoleNotification('minor-upgrade-notification', { text: '' }, {}))
   triggers:
     - name: clusterversion_appuio
@@ -144,6 +155,22 @@ spec:
   data:
     config.json: |-
       {
+          "additionalFactsConfigMap": {
+              "apiVersion": "v1",
+              "kind": "ConfigMap",
+              "metadata": {
+                  "annotations": {
+                      "syn.tools/source": "https://github.com/appuio/component-openshift4-console.git"
+                  },
+                  "labels": {
+                      "app.kubernetes.io/component": "openshift4-console",
+                      "app.kubernetes.io/managed-by": "espejote",
+                      "steward.syn.tools/include-facts": ""
+                  },
+                  "name": "openshift-upgrade-additional-facts",
+                  "namespace": "syn"
+              }
+          },
           "notification": {
               "link": {
                   "href": "https://kb.vshn.ch/oc4/references/release_notes.html",

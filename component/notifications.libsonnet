@@ -12,6 +12,25 @@ local namespace = {
   },
 };
 
+local additionalFactsLabel = std.get(std.get(inv.parameters, 'steward', {}), 'additional_facts_config_label', '');
+local additionalFactsNamespace = std.get(std.get(inv.parameters, 'steward', {}), 'namespace', 'syn');
+local additionalFactsConfigMap = {
+  apiVersion: 'v1',
+  kind: 'ConfigMap',
+  metadata: {
+    annotations: {
+      'syn.tools/source': 'https://github.com/appuio/component-openshift4-console.git',
+    },
+    labels: {
+      'app.kubernetes.io/managed-by': 'espejote',
+      'app.kubernetes.io/component': 'openshift4-console',
+      [additionalFactsLabel]: '',
+    },
+    name: 'openshift-upgrade-additional-facts',
+    namespace: additionalFactsNamespace,
+  },
+};
+
 local makeConsoleNotification(name, args) =
   kube._Object('console.openshift.io/v1', 'ConsoleNotification', name) {
     metadata+: {
@@ -38,6 +57,27 @@ local consoleNotifications = [
 
 local notificationRBAC =
   local sa = kube.ServiceAccount('notification-manager') + namespace;
+  local role = kube.Role('appuio:notification-manager') {
+    metadata+: {
+      namespace: additionalFactsNamespace,
+    },
+    rules: [
+      {
+        apiGroups: [ '' ],
+        resources: [ 'configmaps' ],
+        resourceNames: [ additionalFactsConfigMap.metadata.name ],
+        verbs: [ '*' ],
+      },
+    ],
+  };
+  local role_binding =
+    kube.RoleBinding('appuio:notification-manager') {
+      metadata+: {
+        namespace: additionalFactsNamespace,
+      },
+      subjects_: [ sa ],
+      roleRef_: role,
+    };
   local cluster_role = kube.ClusterRole('appuio:notification-manager') {
     rules: [
       {
@@ -74,6 +114,8 @@ local notificationRBAC =
     };
   {
     sa: sa,
+    role: role,
+    role_binding: role_binding,
     cluster_role: cluster_role,
     cluster_role_binding: cluster_role_binding,
   };
@@ -84,6 +126,7 @@ local jsonnetlib =
       data: {
         'config.json': std.manifestJson({
           notification: params.upgrade_notification.notification,
+          additionalFactsConfigMap: additionalFactsConfigMap,
         }),
         'dst.json': std.manifestJson({
           '2025-10-26': 1,

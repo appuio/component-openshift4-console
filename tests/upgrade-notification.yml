@@ -8,6 +8,9 @@ parameters:
   espejote:
     namespace: syn-espejote
 
+  steward:
+    additional_facts_config_label: 'steward.syn.tools/include-facts'
+
   openshift4_console:
     openshift_version:
       Major: '4'

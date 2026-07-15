@@ -73,7 +73,18 @@ local makeConsoleNotification(name, args, repl) =
     ),
   };
 
-if upgradeWindow != null then
-  makeConsoleNotification('minor-upgrade-notification', config.notification, replacementValues)
-else
+local updateDynamicFacts(nextDate, nextVersion) =
+  config.additionalFactsConfigMap {
+    data: {
+      facts: std.manifestJson({
+        openshiftNextMinorDate: nextDate,
+        openshiftNextMinorVersion: nextVersion,
+      }),
+    },
+  };
+
+if upgradeWindow != null then [
+  makeConsoleNotification('minor-upgrade-notification', config.notification, replacementValues),
+  updateDynamicFacts(std.get(replacementValues, '$NEXT_MAINTENANCE', 'N/A'), std.get(replacementValues, '$OVERLAY_VERSION', 'N/A')),
+] else
   esp.markForDelete(makeConsoleNotification('minor-upgrade-notification', { text: '' }, {}))

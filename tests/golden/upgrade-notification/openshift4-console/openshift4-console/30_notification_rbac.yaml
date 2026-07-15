@@ -59,6 +59,39 @@ subjects:
     name: notification-manager
     namespace: openshift-console
 ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    name: appuio-notification-manager
+  name: appuio:notification-manager
+  namespace: syn
+rules:
+  - apiGroups:
+      - ''
+    resourceNames:
+      - openshift-upgrade-additional-facts
+    resources:
+      - configmaps
+    verbs:
+      - '*'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    name: appuio-notification-manager
+  name: appuio:notification-manager
+  namespace: syn
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: appuio:notification-manager
+subjects:
+  - kind: ServiceAccount
+    name: notification-manager
+    namespace: openshift-console
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:

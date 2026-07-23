@@ -225,16 +225,6 @@ local consoleSpec =
     else {}
   ) + (
     if openshiftMinor > 18 then
-      local availableCaps = {
-        '19': std.set([
-          'LightspeedButton',
-          'GettingStartedBanner',
-        ]),
-        '20': std.set([
-          'LightspeedButton',
-          'GettingStartedBanner',
-        ]),
-      };
       {
         local existingCaps = std.set(
           [ c.name for c in std.get(super.customization, 'capabilities', []) ]
@@ -250,9 +240,7 @@ local consoleSpec =
               },
             }
             for name in std.objectFields(params.capabilities)
-            if
-              !std.setMember(name, existingCaps) &&
-              std.setMember(name, availableCaps[params.openshift_version.Minor])
+            if !std.setMember(name, existingCaps)
           ],
         },
       } else {}

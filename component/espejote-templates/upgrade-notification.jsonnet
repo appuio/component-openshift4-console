@@ -86,5 +86,7 @@ local updateDynamicFacts(nextDate, nextVersion) =
 if upgradeWindow != null then [
   makeConsoleNotification('minor-upgrade-notification', config.notification, replacementValues),
   updateDynamicFacts(std.get(replacementValues, '$NEXT_MAINTENANCE', 'N/A'), std.get(replacementValues, '$OVERLAY_VERSION', 'N/A')),
-] else
-  esp.markForDelete(makeConsoleNotification('minor-upgrade-notification', { text: '' }, {}))
+] else [
+  esp.markForDelete(makeConsoleNotification('minor-upgrade-notification', { text: '' }, {})),
+  updateDynamicFacts('', ''),
+]
